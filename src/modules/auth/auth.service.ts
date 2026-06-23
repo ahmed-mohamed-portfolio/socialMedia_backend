@@ -1,4 +1,3 @@
-import { AplicationException } from "../../common/exceptions/application.exceptions"
 import { loginDto } from "./auth.dto"
 
 
@@ -9,7 +8,8 @@ class authService {
     }
 
     login(data: loginDto): loginDto {
-        throw new AplicationException("error form login", 505)
+        return data
+        // throw new AplicationException("error form login", 505)
 
     }
 }
