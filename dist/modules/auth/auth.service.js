@@ -5,7 +5,7 @@ class authService {
     constructor() {
     }
     login(data) {
-        throw new application_exceptions_1.AplicationException();
+        throw new application_exceptions_1.AplicationException("error form login", 505);
     }
 }
 exports.default = new authService;

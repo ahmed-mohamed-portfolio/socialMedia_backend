@@ -9,7 +9,7 @@ class authService {
     }
 
     login(data: loginDto): loginDto {
-        throw new AplicationException()
+        throw new AplicationException("error form login", 505)
 
     }
 }
