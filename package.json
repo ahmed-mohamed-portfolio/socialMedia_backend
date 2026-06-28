@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:dev": "concurrently \"tsc --watch\" \"node --watch dist/main.js\""
+    "start:dev": "cross-env NODE_ENV=dev concurrently \"tsc --watch\" \"node --watch dist/main.js\"",
+    "start:prod": "cross-env NODE_ENV=prod concurrently \"tsc --watch\" \"node --watch dist/main.js\""
+
   },
   "keywords": [],
   "author": "",
@@ -15,8 +17,11 @@
   },
   "dependencies": {
     "@types/cors": "^2.8.19",
+    "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
     "cors": "^2.8.6",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "zod": "^4.4.3"
   }

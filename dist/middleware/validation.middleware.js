@@ -10,9 +10,11 @@ const validation = (schema) => {
             if (!schema[key]) {
                 continue;
             }
-            const value = schema[key].safeParse(req[key]);
-            if (!value.success) {
-                validationError.push({ key, issue: value.error.issues });
+            else {
+                const value = schema[key].safeParse(req[key]);
+                if (!value.success) {
+                    validationError.push({ key, issue: value.error.issues });
+                }
             }
         }
         if (validationError.length > 0) {

@@ -3,6 +3,7 @@ import type { Express, Response, Request } from "express"
 import { authRouter } from "./modules"
 import cors from 'cors'
 import { globalErrorHandler } from "./middleware/error.middleware"
+import { PORT } from "./config/env.service"
 
 export const bootstrap = (): void => {
 
@@ -11,8 +12,8 @@ export const bootstrap = (): void => {
     app.use('/auth', authRouter)
 
     app.use(globalErrorHandler)
-    app.listen(3000, () => {
-        console.log("server run in port 3000");
+    app.listen(PORT, () => {
+        console.log(`server run in port ${PORT}`);
 
     })
 }
