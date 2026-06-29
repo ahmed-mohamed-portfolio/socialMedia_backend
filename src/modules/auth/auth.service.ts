@@ -10,7 +10,7 @@ import { DatabaseRepository } from "../../database/repository/base.repository"
 class authService {
 
     private userModel: Model<IUser>
-    private userRepository: DatabaseRepository
+    private userRepository: DatabaseRepository<IUser>
     constructor() {
         this.userModel = userModel
         this.userRepository = new DatabaseRepository(this.userModel)
@@ -18,7 +18,7 @@ class authService {
 
     async signin(data: loginDto) {
 
-        let result = await this.userRepository.findone({ email: data.email, password: data.password })
+        let result = await this.userRepository.findone({ email: data.email, password: data.password }, "-password")
         if (!result) {
             throw new NotFoundException("user not found")
         }

@@ -15,7 +15,7 @@ class authService {
         this.userRepository = new base_repository_1.DatabaseRepository(this.userModel);
     }
     async signin(data) {
-        let result = await this.userRepository.findone({ email: data.email, password: data.password });
+        let result = await this.userRepository.findone({ email: data.email, password: data.password }, "-password");
         if (!result) {
             throw new application_exceptions_1.NotFoundException("user not found");
         }
