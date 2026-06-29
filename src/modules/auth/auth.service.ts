@@ -16,9 +16,9 @@ class authService {
         this.userRepository = new DatabaseRepository(this.userModel)
     }
 
-    async signin(data: loginDto) {
+    async signin(data: loginDto): Promise<HydratedDocument<IUser>> {
 
-        let result = await this.userRepository.findone({ email: data.email, password: data.password }, "-password")
+        let result: HydratedDocument<IUser> | null = await this.userRepository.findone({ email: data.email, password: data.password }, "-password")
         if (!result) {
             throw new NotFoundException("user not found")
         }
