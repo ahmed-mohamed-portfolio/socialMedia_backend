@@ -4,14 +4,15 @@ exports.validation = void 0;
 const application_exceptions_1 = require("../common/exceptions/application.exceptions");
 const validation = (schema) => {
     return ((req, res, next) => {
-        console.log(Object.keys(schema));
+        // console.log(Object.keys(schema));
         let validationError = [];
         for (const key of Object.keys(schema)) {
-            if (!schema[key]) {
+            const validator = schema[key];
+            if (!validator) {
                 continue;
             }
             else {
-                const value = schema[key].safeParse(req[key]);
+                const value = validator.safeParse(req[key]);
                 if (!value.success) {
                     validationError.push({ key, issue: value.error.issues });
                 }

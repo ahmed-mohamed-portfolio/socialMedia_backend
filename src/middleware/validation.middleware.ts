@@ -9,15 +9,17 @@ type ValidationSchema = Partial<Record<ValidationKey, ZodType>>
 
 export const validation = (schema: ValidationSchema) => {
   return ((req: Request, res: Response, next: NextFunction) => {
-    console.log(Object.keys(schema));
+    // console.log(Object.keys(schema));
     let validationError: { key: ValidationKey, issue: ZodError["issues"] }[] = []
 
     for (const key of Object.keys(schema) as ValidationKey[]) {
-      if (!schema[key]) {
+      const validator = schema[key]
+
+      if (!validator) {
         continue
       } else {
 
-        const value = schema[key].safeParse(req[key])
+        const value = validator.safeParse(req[key])
 
         if (!value.success) {
           validationError.push({ key, issue: value.error.issues })
