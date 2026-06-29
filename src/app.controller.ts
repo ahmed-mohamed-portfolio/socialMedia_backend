@@ -4,13 +4,16 @@ import { authRouter } from "./modules"
 import cors from 'cors'
 import { globalErrorHandler } from "./middleware/error.middleware"
 import { PORT } from "./config/env.service"
+import DBconnection from "./database/connection"
 
-export const bootstrap = (): void => {
+export const bootstrap = async (): void => {
 
     const app: Express = express()
     app.use(cors(), express.json())
-    app.use('/auth', authRouter)
+    await DBconnection()
 
+
+    app.use('/auth', authRouter)
     app.use(globalErrorHandler)
     app.listen(PORT, () => {
         console.log(`server run in port ${PORT}`);

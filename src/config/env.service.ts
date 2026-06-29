@@ -7,7 +7,7 @@ config({ path: path.resolve(`./.env.${process.env.NODE_ENV}`) })
 
 
 let PORT = process.env.SERVER_PORT
-// let DB_URL = process.env.DATABASE_URL
+let MONGODB_URL = process.env.MONGODB_URL as string
 // let PROJ_MOOD = process.env.MOOD
 // let Salt = process.env.SALT
 // let jwt_key = process.env.JWT_KEY
@@ -22,8 +22,8 @@ let PORT = process.env.SERVER_PORT
 // let nodeMailer_app_email = process.env.NODEMAILER_APP_EMAIL
 
 export {
-    // DB_URL,
     PORT,
+    MONGODB_URL,
     // PROJ_MOOD,
     // base_url,
     // Salt,
