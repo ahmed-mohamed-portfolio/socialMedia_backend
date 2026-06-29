@@ -17,6 +17,5 @@ export const bootstrap = async (): Promise<void> => {
     app.use(globalErrorHandler)
     app.listen(PORT, () => {
         console.log(`server run in port ${PORT}`);
-
     })
 }
