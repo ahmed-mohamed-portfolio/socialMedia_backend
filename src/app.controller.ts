@@ -6,7 +6,7 @@ import { globalErrorHandler } from "./middleware/error.middleware"
 import { PORT } from "./config/env.service"
 import DBconnection from "./database/connection"
 
-export const bootstrap = async (): void => {
+export const bootstrap = async (): Promise<void> => {
 
     const app: Express = express()
     app.use(cors(), express.json())
