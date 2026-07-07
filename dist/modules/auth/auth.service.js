@@ -8,7 +8,7 @@ const application_exceptions_1 = require("./../../common/exceptions/application.
 const user_model_1 = __importDefault(require("../../database/model/user.model"));
 const application_exceptions_2 = require("../../common/exceptions/application.exceptions");
 const base_repository_1 = require("../../database/repository/base.repository");
-const sendEmail_1 = require("../../common/utils/email/sendEmail");
+const email_events_1 = require("../../common/utils/email/email.events");
 class authService {
     userModel;
     userRepository;
@@ -36,7 +36,7 @@ class authService {
         if (!result) {
             throw new application_exceptions_2.BadRequestException("user not created");
         }
-        await (0, sendEmail_1.sendEmail)({ to: data.email, subject: "signup", html: "<div>hi</div>" });
+        email_events_1.event.emit("verifyEmail", { userId: result._id, email: data.email });
         return result.toJSON();
     }
 }

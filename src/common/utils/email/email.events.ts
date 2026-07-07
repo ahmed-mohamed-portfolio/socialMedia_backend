@@ -2,8 +2,10 @@ import { EventEmitter } from "events"
 import { sendEmail } from "./sendEmail"
 import { verifyEmailTemplate } from "./verifyEmailTemplate"
 import { BadRequestException } from "../../exceptions/application.exceptions"
+import { SecurityService } from "../../services/security.services"
 
 export let event = new EventEmitter()
+const securityService = new SecurityService()
 
 //? send gmail verify code
 event.on("verifyEmail", async (data) => {
@@ -12,11 +14,11 @@ event.on("verifyEmail", async (data) => {
     let code = Math.floor(Math.random() * 10000).toString()
 
     try {
-        await set({
-            key: `OTP::${userId}`,
-            value: await generateHash(code),
-            ttl: 5 * 60
-        })
+        // await set({
+        //     key: `OTP::${userId}`,
+        //     value: await securityService.generateHash({ planText: code }),
+        //     ttl: 5 * 60
+        // })
 
         await sendEmail({
             to: email,
