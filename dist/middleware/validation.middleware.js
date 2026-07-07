@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.validation = void 0;
 const application_exceptions_1 = require("../common/exceptions/application.exceptions");
 const validation = (schema) => {
-    return ((req, res, next) => {
-        // console.log(Object.keys(schema));
+    return (req, res, next) => {
+        // console.log(Object.keys(schema))
         let validationError = [];
         for (const key of Object.keys(schema)) {
             const validator = schema[key];
@@ -19,10 +19,10 @@ const validation = (schema) => {
             }
         }
         if (validationError.length > 0) {
-            throw new application_exceptions_1.BadRequestException('validation error', validationError);
+            throw new application_exceptions_1.BadRequestException("validation error", validationError);
         }
         next();
-    });
+    };
 };
 exports.validation = validation;
 /*
@@ -87,4 +87,4 @@ console.log(user["name"])
 
 الاتنين هيطلعوا:
 Ahmed
-*/ 
+*/

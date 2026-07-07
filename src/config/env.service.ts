@@ -1,15 +1,12 @@
 import { config } from "dotenv"
 import path from "path"
 
-
 config({ path: path.resolve(`./.env.${process.env.NODE_ENV}`) })
-
-
 
 let PORT = process.env.SERVER_PORT
 let MONGODB_URL = process.env.MONGODB_URL as string
 // let PROJ_MOOD = process.env.MOOD
-// let Salt = process.env.SALT
+let SALT = process.env.SALT as string
 // let jwt_key = process.env.JWT_KEY
 // let jwt_admin_signature = process.env.JWT_ADMIN_SIGNATURE
 // let jwt_user_signature = process.env.JWT_USER_SIGNATURE
@@ -26,7 +23,7 @@ export {
     MONGODB_URL,
     // PROJ_MOOD,
     // base_url,
-    // Salt,
+    SALT
     // jwt_key,
     // jwt_admin_signature,
     // jwt_user_signature,
