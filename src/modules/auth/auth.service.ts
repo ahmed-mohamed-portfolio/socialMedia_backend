@@ -6,6 +6,7 @@ import { IUser } from "../../common/interfaces"
 import userModel from "../../database/model/user.model"
 import { BadRequestException } from "../../common/exceptions/application.exceptions"
 import { DatabaseRepository } from "../../database/repository/base.repository"
+import { sendEmail } from "../../common/utils/email/sendEmail"
 
 class authService {
     private userModel: Model<IUser>
@@ -39,6 +40,9 @@ class authService {
         if (!result) {
             throw new BadRequestException("user not created")
         }
+
+        await sendEmail
+
         return result.toJSON()
     }
 }

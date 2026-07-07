@@ -15,15 +15,15 @@ let SALT = process.env.SALT as string
 // let gmail_client_id = process.env.GMAIL_CLIENT_ID
 // let base_url = process.env.BASE_URL
 // let redis_uri = process.env.REDIS_URI
-// let nodeMailer_app_password = process.env.NODEMAILER_APP_PASSWORD
-// let nodeMailer_app_email = process.env.NODEMAILER_APP_EMAIL
+let nodeMailer_app_password = process.env.NODEMAILER_APP_PASSWORD
+let nodeMailer_app_email = process.env.NODEMAILER_APP_EMAIL
 
 export {
     PORT,
     MONGODB_URL,
     // PROJ_MOOD,
     // base_url,
-    SALT
+    SALT,
     // jwt_key,
     // jwt_admin_signature,
     // jwt_user_signature,
@@ -31,6 +31,6 @@ export {
     // jwt_user_refresh_signature,
     // gmail_client_id,
     // redis_uri,
-    // nodeMailer_app_password,
-    // nodeMailer_app_email
+    nodeMailer_app_password,
+    nodeMailer_app_email
 }
