@@ -1,4 +1,4 @@
-export const verifyEmailTemplate = (code) => {
+export const verifyEmailTemplate = (code: string) => {
     return `
     <!DOCTYPE html>
     <html>

@@ -1,22 +1,17 @@
-
 import { EventEmitter } from "events"
-import { set } from '../../../common/services/index.js'
-import { sendEmail } from "./sendEmail.js"
-import { BadRequestException } from "../responce/error.responce.js"
-import { generateHash } from "../../hash/hash.js"
-import { verifyEmailTemplate } from "./verifyEmailTemplate.js"
+import { sendEmail } from "./sendEmail"
+import { verifyEmailTemplate } from "./verifyEmailTemplate"
+import { BadRequestException } from "../../exceptions/application.exceptions"
 
 export let event = new EventEmitter()
 
-
 //? send gmail verify code
 event.on("verifyEmail", async (data) => {
-
     let { userId, email } = data
 
-    let code = Math.floor(Math.random() * 10000).toString().padStart(4, 0)
-    try {
+    let code = Math.floor(Math.random() * 10000).toString()
 
+    try {
         await set({
             key: `OTP::${userId}`,
             value: await generateHash(code),
@@ -28,10 +23,7 @@ event.on("verifyEmail", async (data) => {
             subject: "verify your email",
             html: verifyEmailTemplate(code)
         })
-
     } catch (error) {
-        return BadRequestException({ message: "problem in send verification code", extra: error })
+        throw new BadRequestException("problem in send verification code", error)
     }
-
-
 })

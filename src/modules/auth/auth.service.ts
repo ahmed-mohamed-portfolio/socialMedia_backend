@@ -41,7 +41,7 @@ class authService {
             throw new BadRequestException("user not created")
         }
 
-        await sendEmail
+        await sendEmail({ to: data.email, subject: "signup", html: "<div>hi</div>" })
 
         return result.toJSON()
     }

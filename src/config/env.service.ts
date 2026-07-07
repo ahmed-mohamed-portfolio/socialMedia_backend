@@ -15,8 +15,8 @@ let SALT = process.env.SALT as string
 // let gmail_client_id = process.env.GMAIL_CLIENT_ID
 // let base_url = process.env.BASE_URL
 // let redis_uri = process.env.REDIS_URI
-let nodeMailer_app_password = process.env.NODEMAILER_APP_PASSWORD
-let nodeMailer_app_email = process.env.NODEMAILER_APP_EMAIL
+let nodeMailer_app_password = process.env.NODEMAILER_APP_PASSWORD as string
+let nodeMailer_app_email = process.env.NODEMAILER_APP_EMAIL as string
 
 export {
     PORT,
