@@ -18,7 +18,7 @@ const transporter = nodemailer_1.default.createTransport({
 // Send an email using async/await
 let sendEmail = async ({ to, subject, html }) => {
     const info = await transporter.sendMail({
-        from: `"Ahmed Mohamed" <${env_service_1.nodeMailer_app_email}>`,
+        from: `"SocialMedia App" <${env_service_1.nodeMailer_app_email}>`,
         to,
         subject,
         html

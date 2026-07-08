@@ -11,7 +11,9 @@ const securityService = new SecurityService()
 verifyEmailEvent.on("verifyEmail", async (data) => {
     let { userId, email } = data
 
-    let code = Math.floor(Math.random() * 10000).toString()
+    let code = Math.floor(Math.random() * 10000)
+        .toString()
+        .padStart(4, "0")
 
     try {
         // await set({

@@ -36,7 +36,7 @@ class authService {
         if (!result) {
             throw new application_exceptions_2.BadRequestException("user not created");
         }
-        email_events_1.event.emit("verifyEmail", { userId: result._id, email: data.email });
+        email_events_1.verifyEmailEvent.emit("verifyEmail", { userId: result._id, email: data.email });
         return result.toJSON();
     }
 }
