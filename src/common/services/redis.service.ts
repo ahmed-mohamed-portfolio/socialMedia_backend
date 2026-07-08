@@ -1,20 +1,30 @@
 import { createClient, RedisClientType } from "redis"
+import { redis_uri } from "../../config"
 
 class RedisService {
     private client: RedisClientType
+
     constructor() {
         this.client = createClient({
-            url: "rediss://default:gQAAAAAAAjwiAAIgcDEwNTEwMmFmNmIxZDM0N2RiYTc5MDUzYTJkZjZhNTRmNg@steady-gopher-146466.upstash.io:6379"
+            url: redis_uri
+        })
+
+        this.handleConnection()
+    }
+
+    handleConnection() {
+        this.client.on("error", () => {
+            console.log("redis connection error")
+        })
+
+        this.client.on("ready", () => {
+            console.log("redis connection ready")
         })
     }
 
     async connect() {
-        try {
-            await this.client.connect()
-            console.log("redis connected")
-        } catch (error) {
-            console.log("faild to connect to redis database", error)
-        }
+        await this.client.connect()
+        console.log("redis connected")
     }
 }
 
