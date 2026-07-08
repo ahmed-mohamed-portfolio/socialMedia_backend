@@ -4,11 +4,11 @@ import { verifyEmailTemplate } from "./verifyEmailTemplate"
 import { BadRequestException } from "../../exceptions/application.exceptions"
 import { SecurityService } from "../../services/security.services"
 
-export let event = new EventEmitter()
+export let verifyEmailEvent = new EventEmitter()
 const securityService = new SecurityService()
 
 //? send gmail verify code
-event.on("verifyEmail", async (data) => {
+verifyEmailEvent.on("verifyEmail", async (data) => {
     let { userId, email } = data
 
     let code = Math.floor(Math.random() * 10000).toString()

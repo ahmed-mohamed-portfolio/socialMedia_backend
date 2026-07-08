@@ -7,7 +7,7 @@ import userModel from "../../database/model/user.model"
 import { BadRequestException } from "../../common/exceptions/application.exceptions"
 import { DatabaseRepository } from "../../database/repository/base.repository"
 import { sendEmail } from "../../common/utils/email/sendEmail"
-import { event } from "../../common/utils/email/email.events"
+import { verifyEmailEvent } from "../../common/utils/email/email.events"
 
 class authService {
     private userModel: Model<IUser>
@@ -42,7 +42,7 @@ class authService {
             throw new BadRequestException("user not created")
         }
 
-        event.emit("verifyEmail", { userId: result._id, email: data.email })
+        verifyEmailEvent.emit("verifyEmail", { userId: result._id, email: data.email })
 
         return result.toJSON()
     }
