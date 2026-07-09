@@ -60,7 +60,6 @@ class authService {
         if (user.confirmEmail) {
             throw new ConflictException("email already verified")
         }
-        console.log("user._id", user._id)
 
         let redisCode = await redisService.get(`OTP::${user._id}`)
         if (!redisCode) {
@@ -69,6 +68,10 @@ class authService {
 
         if (await this.securityService.compareHash({ planText: code, cypherText: redisCode })) {
             let userData = await this.userRepository.findByIdAndUpdate(user._id, { confirmEmail: true }, "-password", { new: true })
+
+            if (userData) {
+                await redisService.deleteKey(`OTP::${user._id}`)
+            }
             return userData
         }
 

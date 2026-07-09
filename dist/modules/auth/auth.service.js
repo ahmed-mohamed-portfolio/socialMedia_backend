@@ -49,13 +49,15 @@ class authService {
         if (user.confirmEmail) {
             throw new application_exceptions_1.ConflictException("email already verified");
         }
-        console.log("user._id", user._id);
         let redisCode = await redis_service_1.redisService.get(`OTP::${user._id}`);
         if (!redisCode) {
             throw new application_exceptions_1.NotFoundException("code not found or expired");
         }
         if (await this.securityService.compareHash({ planText: code, cypherText: redisCode })) {
             let userData = await this.userRepository.findByIdAndUpdate(user._id, { confirmEmail: true }, "-password", { new: true });
+            if (userData) {
+                await redis_service_1.redisService.deleteKey(`OTP::${user._id}`);
+            }
             return userData;
         }
         throw new application_exceptions_2.BadRequestException("code not right");
