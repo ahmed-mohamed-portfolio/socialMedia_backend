@@ -1,18 +1,19 @@
 import { SecurityService } from "./../../common/services/security.services"
-import { NotFoundException } from "./../../common/exceptions/application.exceptions"
 import { HydratedDocument, Model } from "mongoose"
-import { loginDto, signupDto } from "./auth.dto"
-import { IUser } from "../../common/interfaces"
-import userModel from "../../database/model/user.model"
+import { ConflictException, NotFoundException } from "./../../common/exceptions/application.exceptions"
+import { loginDto, signupDto, verifyEmailDto } from "./auth.dto"
 import { BadRequestException } from "../../common/exceptions/application.exceptions"
 import { DatabaseRepository } from "../../database/repository/base.repository"
-import { sendEmail } from "../../common/utils/email/sendEmail"
 import { verifyEmailEvent } from "../../common/utils/email/email.events"
+import { redisService } from "../../common/services/redis.service"
+import { IUser } from "../../common/interfaces"
+import userModel from "../../database/model/user.model"
 
 class authService {
     private userModel: Model<IUser>
     private userRepository: DatabaseRepository<IUser>
     private securityService: SecurityService
+
     constructor() {
         this.userModel = userModel
         this.userRepository = new DatabaseRepository(this.userModel)
@@ -46,6 +47,32 @@ class authService {
 
         return result.toJSON()
     }
-}
 
+    async verifyEmail(data: verifyEmailDto) {
+        let { email, code } = data
+
+        let user = await this.userRepository.findOne({ email })
+
+        if (!user) {
+            throw new NotFoundException("email not found")
+        }
+
+        if (user.confirmEmail) {
+            throw new ConflictException("email already verified")
+        }
+        console.log("user._id", user._id)
+
+        let redisCode = await redisService.get(`OTP::${user._id}`)
+        if (!redisCode) {
+            throw new NotFoundException("code not found or expired")
+        }
+
+        if (await this.securityService.compareHash({ planText: code, cypherText: redisCode })) {
+            let userData = await this.userRepository.findByIdAndUpdate(user._id, { confirmEmail: true }, "-password", { new: true })
+            return userData
+        }
+
+        throw new BadRequestException("code not right")
+    }
+}
 export default new authService()

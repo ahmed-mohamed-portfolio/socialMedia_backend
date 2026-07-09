@@ -1,3 +1,4 @@
+import { redisService } from "./../../services/redis.service"
 import { EventEmitter } from "events"
 import { sendEmail } from "./sendEmail"
 import { verifyEmailTemplate } from "./verifyEmailTemplate"
@@ -16,11 +17,11 @@ verifyEmailEvent.on("verifyEmail", async (data) => {
         .padStart(4, "0")
 
     try {
-        // await set({
-        //     key: `OTP::${userId}`,
-        //     value: await securityService.generateHash({ planText: code }),
-        //     ttl: 5 * 60
-        // })
+        await redisService.set({
+            key: `OTP::${userId}`,
+            value: await securityService.generateHash({ planText: code }),
+            ttl: 5 * 60
+        })
 
         await sendEmail({
             to: email,

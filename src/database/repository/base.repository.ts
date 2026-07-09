@@ -1,5 +1,5 @@
-import { HydratedDocument, Model, PopulateOptions } from "mongoose";
-import { IUser } from "../../common/interfaces";
+import { HydratedDocument, Model, PopulateOptions } from "mongoose"
+import { IUser } from "../../common/interfaces"
 
 type Select = string | Record<string, 0 | 1>
 
@@ -10,10 +10,11 @@ type Options = {
     limit?: number
     lean?: boolean
     session?: any
+    new?: boolean
 }
 
 export class DatabaseRepository<TRawDocs> {
-    constructor(private model: Model<TRawDocs>) { }
+    constructor(private model: Model<TRawDocs>) {}
 
     private applyQueryOptions(query: any, select?: Select, options: Options = {}) {
         if (select) {
@@ -67,11 +68,7 @@ export class DatabaseRepository<TRawDocs> {
         return this.applyQueryOptions(query, select, options)
     }
 
-    findone(
-        filter: Partial<TRawDocs> = {},
-        select?: Select,
-        populate?: PopulateOptions | PopulateOptions[]
-    ) {
+    findone(filter: Partial<TRawDocs> = {}, select?: Select, populate?: PopulateOptions | PopulateOptions[]) {
         return this.findOne(filter, select, { populate })
     }
 
@@ -95,23 +92,13 @@ export class DatabaseRepository<TRawDocs> {
         return this.model.updateMany(filter, data, options)
     }
 
-    findOneAndUpdate(
-        filter: Partial<TRawDocs> = {},
-        data: Partial<TRawDocs> = {},
-        select?: Select,
-        options: Options = {}
-    ) {
+    findOneAndUpdate(filter: Partial<TRawDocs> = {}, data: Partial<TRawDocs> = {}, select?: Select, options: Options = {}) {
         const query = this.model.findOneAndUpdate(filter, data, options)
 
         return this.applyQueryOptions(query, select, options)
     }
 
-    findByIdAndUpdate(
-        id: string,
-        data: Partial<TRawDocs> = {},
-        select?: Select,
-        options: Options = {}
-    ) {
+    findByIdAndUpdate(id: string, data: Partial<TRawDocs> = {}, select?: Select, options: Options = {}) {
         const query = this.model.findByIdAndUpdate(id, data, options)
 
         return this.applyQueryOptions(query, select, options)

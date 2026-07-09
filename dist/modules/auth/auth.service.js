@@ -5,10 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const security_services_1 = require("./../../common/services/security.services");
 const application_exceptions_1 = require("./../../common/exceptions/application.exceptions");
-const user_model_1 = __importDefault(require("../../database/model/user.model"));
 const application_exceptions_2 = require("../../common/exceptions/application.exceptions");
 const base_repository_1 = require("../../database/repository/base.repository");
 const email_events_1 = require("../../common/utils/email/email.events");
+const redis_service_1 = require("../../common/services/redis.service");
+const user_model_1 = __importDefault(require("../../database/model/user.model"));
 class authService {
     userModel;
     userRepository;
@@ -38,6 +39,26 @@ class authService {
         }
         email_events_1.verifyEmailEvent.emit("verifyEmail", { userId: result._id, email: data.email });
         return result.toJSON();
+    }
+    async verifyEmail(data) {
+        let { email, code } = data;
+        let user = await this.userRepository.findOne({ email });
+        if (!user) {
+            throw new application_exceptions_1.NotFoundException("email not found");
+        }
+        if (user.confirmEmail) {
+            throw new application_exceptions_1.ConflictException("email already verified");
+        }
+        console.log("user._id", user._id);
+        let redisCode = await redis_service_1.redisService.get(`OTP::${user._id}`);
+        if (!redisCode) {
+            throw new application_exceptions_1.NotFoundException("code not found or expired");
+        }
+        if (await this.securityService.compareHash({ planText: code, cypherText: redisCode })) {
+            let userData = await this.userRepository.findByIdAndUpdate(user._id, { confirmEmail: true }, "-password", { new: true });
+            return userData;
+        }
+        throw new application_exceptions_2.BadRequestException("code not right");
     }
 }
 exports.default = new authService();

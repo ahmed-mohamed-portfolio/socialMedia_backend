@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyEmailEvent = void 0;
+const redis_service_1 = require("./../../services/redis.service");
 const events_1 = require("events");
 const sendEmail_1 = require("./sendEmail");
 const verifyEmailTemplate_1 = require("./verifyEmailTemplate");
@@ -15,11 +16,11 @@ exports.verifyEmailEvent.on("verifyEmail", async (data) => {
         .toString()
         .padStart(4, "0");
     try {
-        // await set({
-        //     key: `OTP::${userId}`,
-        //     value: await securityService.generateHash({ planText: code }),
-        //     ttl: 5 * 60
-        // })
+        await redis_service_1.redisService.set({
+            key: `OTP::${userId}`,
+            value: await securityService.generateHash({ planText: code }),
+            ttl: 5 * 60
+        });
         await (0, sendEmail_1.sendEmail)({
             to: email,
             subject: "verify your email",

@@ -13,21 +13,25 @@ const userSchema = new Schema({
     profilePic: { type: String },
     profileCoverPic: [{ type: String }],
     password: {
-        type: String, required: function () {
+        type: String,
+        required: function () {
             return this.provider === 0 /* ProviderEnum.system */;
         }
     },
     gender: { type: Number, default: 0 /* GenderEnum.male */ },
     role: { type: Number, default: 1 /* RoleEnum.user */ },
     provider: { type: Number, default: 0 /* ProviderEnum.system */ },
-    confirmEmail: { type: Boolean }
+    confirmEmail: { type: Boolean, default: false }
 });
-userSchema.virtual('userName').set(function (value) {
-    let [firstName, lastName] = value.split(' ');
+userSchema
+    .virtual("userName")
+    .set(function (value) {
+    let [firstName, lastName] = value.split(" ");
     this.firstName = firstName;
     this.lastName = lastName;
-}).get(function () {
+})
+    .get(function () {
     return `${this.firstName} ${this.lastName}`;
 });
-const userModel = mongoose_1.default.model('User', userSchema);
+const userModel = mongoose_1.default.model("User", userSchema);
 exports.default = userModel;

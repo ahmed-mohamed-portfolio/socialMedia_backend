@@ -1,6 +1,9 @@
-
 export class ApplicationException extends Error {
-    constructor(message: string, public status: number, cause?: unknown) {
+    constructor(
+        message: string,
+        public status: number,
+        cause?: unknown
+    ) {
         super(message, { cause })
         this.name = this.constructor.name
     }
@@ -36,4 +39,8 @@ export class ConflictException extends ApplicationException {
     }
 }
 
-
+export class ServiceUnavailableException extends ApplicationException {
+    constructor(message: string, cause?: unknown) {
+        super(message, 503, cause)
+    }
+}
