@@ -3,32 +3,48 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const base_repository_1 = require("./../../database/repository/base.repository");
 const security_services_1 = require("./../../common/services/security.services");
 const application_exceptions_1 = require("./../../common/exceptions/application.exceptions");
 const application_exceptions_2 = require("../../common/exceptions/application.exceptions");
-const base_repository_1 = require("../../database/repository/base.repository");
 const email_events_1 = require("../../common/utils/email/email.events");
 const redis_service_1 = require("../../common/services/redis.service");
 const user_model_1 = __importDefault(require("../../database/model/user.model"));
+const token_service_1 = require("../../common/services/token.service");
 class authService {
     userModel;
     userRepository;
     securityService;
+    tokenService;
     constructor() {
         this.userModel = user_model_1.default;
         this.userRepository = new base_repository_1.DatabaseRepository(this.userModel);
         this.securityService = new security_services_1.SecurityService();
+        this.tokenService = new token_service_1.TokenService();
     }
-    async signin(data) {
-        let result = await this.userRepository.findone({ email: data.email });
-        if (!result) {
-            throw new application_exceptions_1.NotFoundException("user not found");
+    // async signin(data: loginDto): Promise<HydratedDocument<IUser>> {
+    //     let result: HydratedDocument<IUser> | null = await this.userRepository.findone({ email: data.email })
+    //     if (!result) {
+    //         throw new NotFoundException("user not found")
+    //     }
+    //     let matchedPassword = await this.securityService.compareHash({ planText: data.password, cypherText: result.password })
+    //     if (!matchedPassword) {
+    //         throw new BadRequestException("wrong password")
+    //     }
+    //     return result
+    // }
+    async login(data, issuer) {
+        let { email, password } = data;
+        let existUser = await this.userRepository.findOne({ email, provider: 0 /* ProviderEnum.system */ });
+        console.log("existUser", existUser);
+        if (existUser) {
+            let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password });
+            if (isMatched) {
+                let { accessToken, refreshToken } = this.tokenService.generateToken(existUser, issuer);
+                return { existUser, accessToken, refreshToken };
+            }
         }
-        let matchedPassword = await this.securityService.compareHash({ planText: data.password, cypherText: result.password });
-        if (!matchedPassword) {
-            throw new application_exceptions_2.BadRequestException("wrong password");
-        }
-        return result;
+        throw new application_exceptions_1.NotFoundException("user not found");
     }
     async signup(data) {
         console.log(data);

@@ -8,7 +8,9 @@ import { validation } from "../../middleware/validation.middleware"
 const router = Router()
 
 router.post("/signin", validation(signinSchema), async (req: Request, res: Response) => {
-    let data = await authService.signin(req.body)
+    let host = `${req.protocol}://${req.host}`
+
+    let data = await authService.login(req.body, host)
     SuccessResponse({ res, message: "signin success", data })
 })
 

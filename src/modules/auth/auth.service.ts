@@ -1,37 +1,58 @@
+import { DatabaseRepository } from "./../../database/repository/base.repository"
 import { SecurityService } from "./../../common/services/security.services"
 import { HydratedDocument, Model } from "mongoose"
 import { ConflictException, NotFoundException } from "./../../common/exceptions/application.exceptions"
 import { loginDto, signupDto, verifyEmailDto } from "./auth.dto"
 import { BadRequestException } from "../../common/exceptions/application.exceptions"
-import { DatabaseRepository } from "../../database/repository/base.repository"
 import { verifyEmailEvent } from "../../common/utils/email/email.events"
 import { redisService } from "../../common/services/redis.service"
 import { IUser } from "../../common/interfaces"
 import userModel from "../../database/model/user.model"
+import { ProviderEnum } from "./../../common/enums/index"
+import { TokenService } from "../../common/services/token.service"
 
 class authService {
     private userModel: Model<IUser>
     private userRepository: DatabaseRepository<IUser>
     private securityService: SecurityService
-
+    private tokenService: TokenService
     constructor() {
         this.userModel = userModel
         this.userRepository = new DatabaseRepository(this.userModel)
         this.securityService = new SecurityService()
+        this.tokenService = new TokenService()
     }
 
-    async signin(data: loginDto): Promise<HydratedDocument<IUser>> {
-        let result: HydratedDocument<IUser> | null = await this.userRepository.findone({ email: data.email })
-        if (!result) {
-            throw new NotFoundException("user not found")
+    // async signin(data: loginDto): Promise<HydratedDocument<IUser>> {
+    //     let result: HydratedDocument<IUser> | null = await this.userRepository.findone({ email: data.email })
+    //     if (!result) {
+    //         throw new NotFoundException("user not found")
+    //     }
+
+    //     let matchedPassword = await this.securityService.compareHash({ planText: data.password, cypherText: result.password })
+    //     if (!matchedPassword) {
+    //         throw new BadRequestException("wrong password")
+    //     }
+
+    //     return result
+    // }
+
+    async login(data: loginDto, issuer: string) {
+        let { email, password } = data
+        let existUser = await this.userRepository.findOne({ email, provider: ProviderEnum.system })
+        console.log("existUser", existUser)
+
+        if (existUser) {
+            let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password })
+
+            if (isMatched) {
+                let { accessToken, refreshToken } = this.tokenService.generateToken(existUser, issuer)
+
+                return { existUser, accessToken, refreshToken }
+            }
         }
 
-        let matchedPassword = await this.securityService.compareHash({ planText: data.password, cypherText: result.password })
-        if (!matchedPassword) {
-            throw new BadRequestException("wrong password")
-        }
-
-        return result
+        throw new NotFoundException("user not found")
     }
 
     async signup(data: signupDto): Promise<IUser> {

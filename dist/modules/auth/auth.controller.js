@@ -10,7 +10,8 @@ const auth_validation_1 = require("./auth.validation");
 const validation_middleware_1 = require("../../middleware/validation.middleware");
 const router = (0, express_1.Router)();
 router.post("/signin", (0, validation_middleware_1.validation)(auth_validation_1.signinSchema), async (req, res) => {
-    let data = await auth_service_1.default.signin(req.body);
+    let host = `${req.protocol}://${req.host}`;
+    let data = await auth_service_1.default.login(req.body, host);
     (0, success_response_1.SuccessResponse)({ res, message: "signin success", data });
 });
 router.post("/signup", (0, validation_middleware_1.validation)(auth_validation_1.signupSchema), async (req, res) => {

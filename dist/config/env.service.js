@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.nodeMailer_app_email = exports.nodeMailer_app_password = exports.redis_uri = exports.SALT = exports.MONGODB_URL = exports.PORT = void 0;
+exports.nodeMailer_app_email = exports.nodeMailer_app_password = exports.redis_uri = exports.jwt_user_refresh_signature = exports.jwt_admin_refresh_signature = exports.jwt_user_signature = exports.jwt_admin_signature = exports.SALT = exports.MONGODB_URL = exports.PORT = void 0;
 const dotenv_1 = require("dotenv");
 const path_1 = __importDefault(require("path"));
 (0, dotenv_1.config)({ path: path_1.default.resolve(`./.env.${process.env.NODE_ENV}`) });
@@ -14,11 +14,14 @@ exports.MONGODB_URL = MONGODB_URL;
 // let PROJ_MOOD = process.env.MOOD
 let SALT = process.env.SALT;
 exports.SALT = SALT;
-// let jwt_key = process.env.JWT_KEY
-// let jwt_admin_signature = process.env.JWT_ADMIN_SIGNATURE
-// let jwt_user_signature = process.env.JWT_USER_SIGNATURE
-// let jwt_admin_refresh_signature = process.env.JWT_ADMIN_REFRESH_SIGNATURE
-// let jwt_user_refresh_signature = process.env.JWT_USER_REFRESH_SIGNATURE
+let jwt_admin_signature = process.env.JWT_ADMIN_SIGNATURE;
+exports.jwt_admin_signature = jwt_admin_signature;
+let jwt_user_signature = process.env.JWT_USER_SIGNATURE;
+exports.jwt_user_signature = jwt_user_signature;
+let jwt_admin_refresh_signature = process.env.JWT_ADMIN_REFRESH_SIGNATURE;
+exports.jwt_admin_refresh_signature = jwt_admin_refresh_signature;
+let jwt_user_refresh_signature = process.env.JWT_USER_REFRESH_SIGNATURE;
+exports.jwt_user_refresh_signature = jwt_user_refresh_signature;
 // let gmail_client_id = process.env.GMAIL_CLIENT_ID
 // let base_url = process.env.BASE_URL
 let redis_uri = process.env.REDIS_URI;
