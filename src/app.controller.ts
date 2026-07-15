@@ -11,12 +11,10 @@ import cookieParser from "cookie-parser"
 
 export const bootstrap = async (): Promise<void> => {
     const app: Express = express()
-    app.use(express.json())
+
+    app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-
-    app.use(cookieParser())
-
-
+    app.use(cookieParser());
     app.use(cors({
         origin: [
             "http://localhost:4200",
@@ -24,17 +22,11 @@ export const bootstrap = async (): Promise<void> => {
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization",]
     }));
-
+    app.use("/users", authRouter);
 
 
     await redisService.connect()
     await DBconnection()
-
-    app.use("/users", authRouter)
-
-
-
-
 
 
     app.get("/get-cookie", (req, res) => {
@@ -47,8 +39,6 @@ export const bootstrap = async (): Promise<void> => {
         }
 
     })
-
-
 
 
 

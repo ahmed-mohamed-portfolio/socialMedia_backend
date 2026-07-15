@@ -24,9 +24,9 @@ const bootstrap = async () => {
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization",]
     }));
+    app.use("/users", modules_1.authRouter);
     await redis_service_1.redisService.connect();
     await (0, connection_1.default)();
-    app.use("/users", modules_1.authRouter);
     app.get("/get-cookie", (req, res) => {
         if (req.cookies.accessToken) {
             return res.json({ auth: true });
