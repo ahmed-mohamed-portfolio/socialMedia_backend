@@ -8,7 +8,7 @@ import { redisService } from "./redis.service"
 import { existuser } from "../../modules/auth/auth.dto"
 import { RoleEnum } from "../enums"
 import { IUser } from "../interfaces"
-import { Model } from "mongoose"
+import { HydratedDocument, Model } from "mongoose"
 
 export class TokenService {
     private userModel: Model<IUser>
@@ -18,7 +18,7 @@ export class TokenService {
         this.userRepository = new DatabaseRepository(this.userModel)
     }
 
-    generateToken(existUser: any, issuer: string): { accessToken: string; refreshToken: string } {
+    generateToken(existUser: HydratedDocument<IUser>, issuer: string): { accessToken: string; refreshToken: string } {
         let audience: string | undefined = undefined
         let signature: string | undefined = undefined
         let refreshSignature: string | undefined = undefined

@@ -125,7 +125,7 @@ class authService {
             }
             return this.loginWithGmail(idToken, issuer);
         }
-        const user = await this.userRepository.insertOne({
+        const user = await this.userRepository.create({
             firstName: payload.given_name,
             lastName: payload.family_name,
             email: payload.email,
