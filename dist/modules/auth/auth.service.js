@@ -37,7 +37,7 @@ class authService {
     // }
     async login(data, issuer) {
         let { email, password } = data;
-        let existUser = await this.userRepository.findOne({ email, provider: 0 /* ProviderEnum.system */ });
+        let existUser = await this.userRepository.findOne({ email });
         console.log("existUser", existUser);
         if (existUser) {
             let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password });
@@ -49,6 +49,10 @@ class authService {
         throw new application_exceptions_1.NotFoundException("user not found");
     }
     async signup(data) {
+        const existuser = await this.userRepository.findOne({ email: data.email });
+        if (existuser) {
+            throw new application_exceptions_2.BadRequestException("email already signed before");
+        }
         const user = await this.userRepository.findOne({ email: data.email, provider: 0 /* ProviderEnum.system */ });
         if (user && user.confirmEmail == false) {
             email_events_1.verifyEmailEvent.emit("verifyEmail", { userId: user._id, email: data.email });
@@ -119,13 +123,13 @@ class authService {
     signupWithGmail = async (idToken, issuer) => {
         const payload = await this.VerifyGoogleAccount(idToken);
         console.log("payload", payload);
-        if (!payload) {
-            throw new application_exceptions_2.BadRequestException("bad payload");
+        if (!payload.email) {
+            throw new application_exceptions_2.BadRequestException("Google account has no email");
         }
         const checkExist = await this.userRepository.findOne({ email: payload.email });
         if (checkExist) {
             if (checkExist.provider == 0 /* ProviderEnum.system */ && checkExist.confirmEmail == false) {
-                throw new application_exceptions_1.ConflictException("invalid login porvider");
+                await this.userRepository.findOneAndUpdate({ email: payload.email }, { confirmEmail: true });
             }
             return this.loginWithGmail(idToken, issuer);
         }

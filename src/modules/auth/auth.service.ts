@@ -41,7 +41,7 @@ class authService {
 
     async login(data: loginDto, issuer: string) {
         let { email, password } = data
-        let existUser = await this.userRepository.findOne({ email, provider: ProviderEnum.system },)
+        let existUser = await this.userRepository.findOne({ email },)
         console.log("existUser", existUser)
 
         if (existUser) {
@@ -58,6 +58,11 @@ class authService {
     }
 
     async signup(data: signupDto): Promise<IUser> {
+
+        const existuser = await this.userRepository.findOne({ email: data.email })
+        if (existuser) {
+            throw new BadRequestException("email already signed before")
+        }
 
         const user: HydratedDocument<IUser> = await this.userRepository.findOne({ email: data.email, provider: ProviderEnum.system })
         if (user && user.confirmEmail == false) {
@@ -154,18 +159,19 @@ class authService {
 
         console.log("payload", payload);
 
-        if (!payload) {
-            throw new BadRequestException("bad payload")
+        if (!payload.email) {
+            throw new BadRequestException("Google account has no email")
         }
         const checkExist = await this.userRepository.findOne({ email: payload.email })
 
         if (checkExist) {
             if (checkExist.provider == ProviderEnum.system && checkExist.confirmEmail == false) {
-                throw new ConflictException("invalid login porvider")
+                await this.userRepository.findOneAndUpdate({ email: payload.email }, { confirmEmail: true })
             }
 
             return this.loginWithGmail(idToken, issuer)
         }
+
 
         const user = await this.userRepository.create({
             firstName: payload.given_name,
