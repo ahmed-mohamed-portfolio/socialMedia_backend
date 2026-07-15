@@ -11,6 +11,8 @@ const email_events_1 = require("../../common/utils/email/email.events");
 const redis_service_1 = require("../../common/services/redis.service");
 const user_model_1 = __importDefault(require("../../database/model/user.model"));
 const token_service_1 = require("../../common/services/token.service");
+const google_auth_library_1 = require("google-auth-library");
+const env_service_1 = require("./../../config/env.service");
 class authService {
     userModel;
     userRepository;
@@ -47,7 +49,11 @@ class authService {
         throw new application_exceptions_1.NotFoundException("user not found");
     }
     async signup(data) {
-        console.log(data);
+        const user = await this.userRepository.findOne({ email: data.email, provider: 0 /* ProviderEnum.system */ });
+        if (user && user.confirmEmail == false) {
+            email_events_1.verifyEmailEvent.emit("verifyEmail", { userId: user._id, email: data.email });
+            return user.toJSON();
+        }
         data.password = await this.securityService.generateHash({ planText: data.password });
         let result = await this.userRepository.create(data);
         if (!result) {
@@ -78,5 +84,59 @@ class authService {
         }
         throw new application_exceptions_2.BadRequestException("code not right");
     }
+    async VerifyGoogleAccount(idToken) {
+        const client = new google_auth_library_1.OAuth2Client();
+        const ticket = await client.verifyIdToken({
+            idToken,
+            /*
+               https://console.cloud.google.com/auth/clients?project=c45learnloginbygmail&pli=1
+            */
+            audience: env_service_1.gmail_client_id
+        });
+        const payload = ticket.getPayload();
+        if (!payload) {
+            throw new application_exceptions_2.BadRequestException("bad payload");
+        }
+        if (!payload.email_verified) {
+            throw new application_exceptions_2.BadRequestException("fail to verify by google");
+        }
+        return payload;
+    }
+    async loginWithGmail(idToken, issuer) {
+        const payload = await this.VerifyGoogleAccount(idToken);
+        const user = await this.userRepository.findOne({ email: payload.email, provider: 1 /* ProviderEnum.google */ });
+        if (!user) {
+            throw new application_exceptions_1.NotFoundException("not registered account");
+        }
+        let { accessToken, refreshToken } = this.tokenService.generateToken(user, issuer);
+        let data = { user, accessToken, refreshToken };
+        return { message: "user logged in successfully", status: 200, data };
+    }
+    signupWithGmail = async (idToken, issuer) => {
+        const payload = await this.VerifyGoogleAccount(idToken);
+        console.log("payload", payload);
+        if (!payload) {
+            throw new application_exceptions_2.BadRequestException("bad payload");
+        }
+        const checkExist = await this.userRepository.findOne({ email: payload.email });
+        if (checkExist) {
+            if (checkExist.provider == 0 /* ProviderEnum.system */) {
+                throw new application_exceptions_1.ConflictException("invalid login porvider");
+            }
+            return this.loginWithGmail(idToken, issuer);
+        }
+        const user = await this.userRepository.insertOne({
+            firstName: payload.given_name,
+            lastName: payload.family_name,
+            email: payload.email,
+            profilePic: payload.picture,
+            confirmEmail: true,
+            provider: 1 /* ProviderEnum.google */,
+            role: 1 /* RoleEnum.user */
+        });
+        let { accessToken, refreshToken } = this.tokenService.generateToken(user, issuer);
+        let data = { user, accessToken, refreshToken };
+        return { message: "user added", status: 201, data };
+    };
 }
 exports.default = new authService();

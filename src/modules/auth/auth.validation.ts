@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { GenderEnum } from "../../common/enums"
 
 export const signupSchema = {
     body: z
@@ -6,8 +7,10 @@ export const signupSchema = {
             userName: z.string().min(2).max(20),
             email: z.email({ error: "email not right" }),
             password: z.string().min(5).max(20),
-            phone: z.string().min(5).max(20),
-            confirmPassword: z.string().min(5).max(20)
+            phone: z.string().min(5).max(20).optional(),
+            confirmPassword: z.string().min(5).max(20),
+            dateOfBirth: z.coerce.date(),
+            gender: z.enum(GenderEnum)
         })
         .refine(
             (data) => {

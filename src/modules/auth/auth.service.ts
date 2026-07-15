@@ -8,8 +8,10 @@ import { verifyEmailEvent } from "../../common/utils/email/email.events"
 import { redisService } from "../../common/services/redis.service"
 import { IUser } from "../../common/interfaces"
 import userModel from "../../database/model/user.model"
-import { ProviderEnum } from "./../../common/enums/index"
+import { ProviderEnum, RoleEnum } from "./../../common/enums/index"
 import { TokenService } from "../../common/services/token.service"
+import { OAuth2Client } from "google-auth-library"
+import { gmail_client_id } from "./../../config/env.service"
 
 class authService {
     private userModel: Model<IUser>
@@ -39,7 +41,7 @@ class authService {
 
     async login(data: loginDto, issuer: string) {
         let { email, password } = data
-        let existUser = await this.userRepository.findOne({ email, provider: ProviderEnum.system })
+        let existUser = await this.userRepository.findOne({ email, provider: ProviderEnum.system },)
         console.log("existUser", existUser)
 
         if (existUser) {
@@ -56,10 +58,17 @@ class authService {
     }
 
     async signup(data: signupDto): Promise<IUser> {
-        console.log(data)
+
+        const user: HydratedDocument<IUser> = await this.userRepository.findOne({ email: data.email, provider: ProviderEnum.system })
+        if (user && user.confirmEmail == false) {
+            verifyEmailEvent.emit("verifyEmail", { userId: user._id, email: data.email })
+            return user.toJSON()
+        }
 
         data.password = await this.securityService.generateHash({ planText: data.password })
+
         let result: HydratedDocument<IUser> = await this.userRepository.create(data)
+
         if (!result) {
             throw new BadRequestException("user not created")
         }
@@ -98,5 +107,76 @@ class authService {
 
         throw new BadRequestException("code not right")
     }
+
+    async VerifyGoogleAccount(idToken: string) {
+        const client = new OAuth2Client()
+        const ticket = await client.verifyIdToken({
+            idToken,
+            /*
+               https://console.cloud.google.com/auth/clients?project=c45learnloginbygmail&pli=1
+            */
+            audience: gmail_client_id
+        })
+        const payload = ticket.getPayload()
+        if (!payload) {
+            throw new BadRequestException("bad payload")
+        }
+        if (!payload.email_verified) {
+            throw new BadRequestException("fail to verify by google")
+        }
+
+        return payload
+    }
+
+    async loginWithGmail(idToken: string, issuer: string) {
+        const payload = await this.VerifyGoogleAccount(idToken)
+
+        const user = await this.userRepository.findOne({ email: payload.email, provider: ProviderEnum.google })
+
+        if (!user) {
+            throw new NotFoundException("not registered account")
+        }
+
+        let { accessToken, refreshToken } = this.tokenService.generateToken(user, issuer)
+
+        let data = { user, accessToken, refreshToken }
+        return { message: "user logged in successfully", status: 200, data }
+    }
+
+    signupWithGmail = async (idToken: string, issuer: string) => {
+
+        const payload = await this.VerifyGoogleAccount(idToken)
+
+        console.log("payload", payload);
+
+        if (!payload) {
+            throw new BadRequestException("bad payload")
+        }
+        const checkExist = await this.userRepository.findOne({ email: payload.email })
+
+        if (checkExist) {
+            if (checkExist.provider == ProviderEnum.system) {
+                throw new ConflictException("invalid login porvider")
+            }
+
+            return this.loginWithGmail(idToken, issuer)
+        }
+
+        const user = await this.userRepository.insertOne({
+            firstName: payload.given_name,
+            lastName: payload.family_name,
+            email: payload.email,
+            profilePic: payload.picture,
+            confirmEmail: true,
+            provider: ProviderEnum.google,
+            role: RoleEnum.user
+        })
+        let { accessToken, refreshToken } = this.tokenService.generateToken(user, issuer)
+
+        let data = { user, accessToken, refreshToken }
+
+        return { message: "user added", status: 201, data }
+    }
 }
+
 export default new authService()

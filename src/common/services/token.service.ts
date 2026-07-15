@@ -18,7 +18,7 @@ export class TokenService {
         this.userRepository = new DatabaseRepository(this.userModel)
     }
 
-    generateToken(existUser: existuser, issuer: string): { accessToken: string; refreshToken: string } {
+    generateToken(existUser: any, issuer: string): { accessToken: string; refreshToken: string } {
         let audience: string | undefined = undefined
         let signature: string | undefined = undefined
         let refreshSignature: string | undefined = undefined

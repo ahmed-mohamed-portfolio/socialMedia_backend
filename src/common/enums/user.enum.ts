@@ -1,9 +1,7 @@
-
-export const enum GenderEnum {
-    male,
-    female
+export enum GenderEnum {
+    male = "male",
+    female = "female"
 }
-
 
 export const enum RoleEnum {
     admin,

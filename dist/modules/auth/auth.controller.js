@@ -8,18 +8,69 @@ const auth_service_1 = __importDefault(require("./auth.service"));
 const success_response_1 = require("../../common/exceptions/success.response");
 const auth_validation_1 = require("./auth.validation");
 const validation_middleware_1 = require("../../middleware/validation.middleware");
+const application_exceptions_1 = require("../../common/exceptions/application.exceptions");
 const router = (0, express_1.Router)();
 router.post("/signin", (0, validation_middleware_1.validation)(auth_validation_1.signinSchema), async (req, res) => {
     let host = `${req.protocol}://${req.host}`;
     let data = await auth_service_1.default.login(req.body, host);
+    res.cookie("refreshToken", data.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        path: "/"
+    });
+    res.cookie("accessToken", data.accessToken, {
+        httpOnly: false,
+        secure: false,
+        sameSite: "lax",
+        path: "/"
+    });
     (0, success_response_1.SuccessResponse)({ res, message: "signin success", data });
 });
 router.post("/signup", (0, validation_middleware_1.validation)(auth_validation_1.signupSchema), async (req, res) => {
     let data = await auth_service_1.default.signup(req.body);
-    (0, success_response_1.SuccessResponse)({ res, message: "signup success", data });
+    (0, success_response_1.SuccessResponse)({ res, message: "success", data });
 });
 router.post("/verify", (0, validation_middleware_1.validation)(auth_validation_1.verifySchema), async (req, res) => {
     let data = await auth_service_1.default.verifyEmail(req.body);
     return (0, success_response_1.SuccessResponse)({ res, message: "email verified", status: 200, data });
+});
+const getCookieValue = (req, key) => {
+    const cookies = req.headers.cookie;
+    if (!cookies) {
+        return null;
+    }
+    for (const cookie of cookies.split(";")) {
+        const [cookieKey, ...cookieValueParts] = cookie.trim().split("=");
+        if (cookieKey === key) {
+            return decodeURIComponent(cookieValueParts.join("="));
+        }
+    }
+    return null;
+};
+router.post("/signup/gmail", async (req, res) => {
+    //? i used this email ==> ahmed.mohamed.connect@gmail.com
+    //req.headers.cookie ==> this dont work till front and back in same domain or local host
+    const csrfCookie = getCookieValue(req, "g_csrf_token");
+    const csrfBody = req.body?.g_csrf_token;
+    if (!csrfCookie || !csrfBody || csrfCookie !== csrfBody) {
+        throw new application_exceptions_1.ConflictException("Invalid Google CSRF token");
+    }
+    let host = `${req.protocol}://${req.host}`;
+    let { message, status, data } = await auth_service_1.default.signupWithGmail(req.body.credential, host);
+    // if success
+    res.cookie("refreshToken", data.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        path: "/"
+    });
+    res.cookie("accessToken", data.accessToken, {
+        httpOnly: false,
+        secure: false,
+        sameSite: "lax",
+        path: "/"
+    });
+    return res.redirect("http://localhost:4200/timeLine");
 });
 exports.default = router;

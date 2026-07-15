@@ -2,14 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifySchema = exports.signinSchema = exports.signupSchema = void 0;
 const zod_1 = require("zod");
+const enums_1 = require("../../common/enums");
 exports.signupSchema = {
     body: zod_1.z
         .strictObject({
         userName: zod_1.z.string().min(2).max(20),
         email: zod_1.z.email({ error: "email not right" }),
         password: zod_1.z.string().min(5).max(20),
-        phone: zod_1.z.string().min(5).max(20),
-        confirmPassword: zod_1.z.string().min(5).max(20)
+        phone: zod_1.z.string().min(5).max(20).optional(),
+        confirmPassword: zod_1.z.string().min(5).max(20),
+        dateOfBirth: zod_1.z.coerce.date(),
+        gender: zod_1.z.enum(enums_1.GenderEnum)
     })
         .refine((data) => {
         return data.password == data.confirmPassword;

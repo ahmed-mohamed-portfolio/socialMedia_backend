@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import { IUser } from "../../common/interfaces"
 import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enums"
+import { type } from "node:os"
 const { Schema } = mongoose
 
 const userSchema = new Schema<IUser>({
@@ -16,7 +17,8 @@ const userSchema = new Schema<IUser>({
             return this.provider === ProviderEnum.system
         }
     },
-    gender: { type: Number, default: GenderEnum.male },
+    dateOfBirth: { type: Date },
+    gender: { type: String, default: GenderEnum.male },
     role: { type: Number, default: RoleEnum.user },
     provider: { type: Number, default: ProviderEnum.system },
     confirmEmail: { type: Boolean, default: false }
