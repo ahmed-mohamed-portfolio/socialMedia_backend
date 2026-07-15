@@ -104,9 +104,13 @@ class authService {
     }
     async loginWithGmail(idToken, issuer) {
         const payload = await this.VerifyGoogleAccount(idToken);
-        const user = await this.userRepository.findOne({ email: payload.email, provider: 1 /* ProviderEnum.google */ });
+        const user = await this.userRepository.findOne({ email: payload.email });
+        console.log("user", user);
         if (!user) {
             throw new application_exceptions_1.NotFoundException("not registered account");
+        }
+        if (!user.confirmEmail) {
+            throw new application_exceptions_2.BadRequestException("email not confirmed");
         }
         let { accessToken, refreshToken } = this.tokenService.generateToken(user, issuer);
         let data = { user, accessToken, refreshToken };
@@ -120,7 +124,7 @@ class authService {
         }
         const checkExist = await this.userRepository.findOne({ email: payload.email });
         if (checkExist) {
-            if (checkExist.provider == 0 /* ProviderEnum.system */) {
+            if (checkExist.provider == 0 /* ProviderEnum.system */ && checkExist.confirmEmail == false) {
                 throw new application_exceptions_1.ConflictException("invalid login porvider");
             }
             return this.loginWithGmail(idToken, issuer);
