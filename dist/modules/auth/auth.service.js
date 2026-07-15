@@ -24,17 +24,6 @@ class authService {
         this.securityService = new security_services_1.SecurityService();
         this.tokenService = new token_service_1.TokenService();
     }
-    // async signin(data: loginDto): Promise<HydratedDocument<IUser>> {
-    //     let result: HydratedDocument<IUser> | null = await this.userRepository.findone({ email: data.email })
-    //     if (!result) {
-    //         throw new NotFoundException("user not found")
-    //     }
-    //     let matchedPassword = await this.securityService.compareHash({ planText: data.password, cypherText: result.password })
-    //     if (!matchedPassword) {
-    //         throw new BadRequestException("wrong password")
-    //     }
-    //     return result
-    // }
     async login(data, issuer) {
         let { email, password } = data;
         let existUser = await this.userRepository.findOne({ email });
@@ -146,5 +135,25 @@ class authService {
         let data = { user, accessToken, refreshToken };
         return { message: "user added", status: 201, data };
     };
+    async logOutFromAllDevices(userId) {
+        let user = await this.userRepository.findByIdAndUpdate(userId, { credentialsUpdatedAt: new Date() }, '_id');
+        //THIS IS A saver way =>  // await deleteByPattern(`RevokeToken::${userId}::`)
+        await redis_service_1.redisService.deleteKey(await redis_service_1.redisService.keys(`RevokeToken::${userId}::`));
+        if (!user) {
+            throw new application_exceptions_1.NotFoundException("user not found");
+        }
+        return true;
+    }
+    async logOut(userId, jti) {
+        let addToken = await redis_service_1.redisService.set({
+            key: `RevokeToken::${userId}::${jti}`,
+            value: jti,
+            ttl: 31536000
+        });
+        if (!addToken) {
+            throw new application_exceptions_2.BadRequestException("cant add token");
+        }
+        return addToken;
+    }
 }
 exports.default = new authService();

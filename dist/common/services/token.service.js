@@ -57,13 +57,10 @@ class TokenService {
     }
     decodeToken(token) {
         let decoded = jsonwebtoken_1.default.decode(token);
-        let signature = undefined;
         if (!decoded) {
             throw new application_exceptions_1.BadRequestException("invalid decoded");
         }
-        if (!signature) {
-            throw new application_exceptions_1.BadRequestException("invalid signature");
-        }
+        let signature = undefined;
         switch (decoded.aud) {
             case "Admin":
                 signature = index_1.jwt_admin_signature;
@@ -96,7 +93,7 @@ class TokenService {
             throw new application_exceptions_1.BadRequestException("no decodedData.iat");
         }
         if (Math.floor(new Date(user.credentialsUpdatedAt).getTime() / 1000) > decodedData.iat) {
-            throw new application_exceptions_1.BadRequestException("invalid token22");
+            throw new application_exceptions_1.BadRequestException("invalid token2211");
         }
         let blocked_Token = await redis_service_1.redisService.get(`RevokeToken::${decodedData.id}::${decodedData.jti}`);
         if (blocked_Token !== null) {

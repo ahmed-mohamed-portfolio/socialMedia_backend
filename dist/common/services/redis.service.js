@@ -47,9 +47,6 @@ class RedisService {
     get = async (key) => {
         try {
             const data = await this.client.get(key);
-            if (!data) {
-                throw new application_exceptions_1.NotFoundException("key not found");
-            }
             return data;
         }
         catch (error) {

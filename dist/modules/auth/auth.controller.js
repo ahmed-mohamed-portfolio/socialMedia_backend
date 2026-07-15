@@ -9,6 +9,7 @@ const success_response_1 = require("../../common/exceptions/success.response");
 const auth_validation_1 = require("./auth.validation");
 const validation_middleware_1 = require("../../middleware/validation.middleware");
 const application_exceptions_1 = require("../../common/exceptions/application.exceptions");
+const auth_middleware_1 = require("../../middleware/auth.middleware");
 const router = (0, express_1.Router)();
 router.post("/signin", (0, validation_middleware_1.validation)(auth_validation_1.signinSchema), async (req, res) => {
     let host = `${req.protocol}://${req.host}`;
@@ -72,5 +73,37 @@ router.post("/signup/gmail", async (req, res) => {
         path: "/"
     });
     return res.redirect("http://localhost:4200/timeLine");
+});
+router.patch("/logout-from-all-devices", auth_middleware_1.authentication, async (req, res) => {
+    await auth_service_1.default.logOutFromAllDevices(req.userId);
+    res.clearCookie("accessToken", {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+    return (0, success_response_1.SuccessResponse)({ res, message: 'logged out from all devices successfully', status: 200 });
+});
+router.post("/logout", auth_middleware_1.authentication, async (req, res) => {
+    await auth_service_1.default.logOut(req.userId, req.jti);
+    res.clearCookie("accessToken", {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+    return (0, success_response_1.SuccessResponse)({ res, message: 'logged out successfully', status: 200 });
 });
 exports.default = router;

@@ -14,6 +14,7 @@ import { OAuth2Client } from "google-auth-library"
 import { gmail_client_id } from "./../../config/env.service"
 
 class authService {
+
     private userModel: Model<IUser>
     private userRepository: DatabaseRepository<IUser>
     private securityService: SecurityService
@@ -24,20 +25,6 @@ class authService {
         this.securityService = new SecurityService()
         this.tokenService = new TokenService()
     }
-
-    // async signin(data: loginDto): Promise<HydratedDocument<IUser>> {
-    //     let result: HydratedDocument<IUser> | null = await this.userRepository.findone({ email: data.email })
-    //     if (!result) {
-    //         throw new NotFoundException("user not found")
-    //     }
-
-    //     let matchedPassword = await this.securityService.compareHash({ planText: data.password, cypherText: result.password })
-    //     if (!matchedPassword) {
-    //         throw new BadRequestException("wrong password")
-    //     }
-
-    //     return result
-    // }
 
     async login(data: loginDto, issuer: string) {
         let { email, password } = data
@@ -188,6 +175,39 @@ class authService {
 
         return { message: "user added", status: 201, data }
     }
+
+    async logOutFromAllDevices(userId: string) {
+
+        let user = await this.userRepository.findByIdAndUpdate(userId, { credentialsUpdatedAt: new Date() }, '_id')
+
+        //THIS IS A saver way =>  // await deleteByPattern(`RevokeToken::${userId}::`)
+        await redisService.deleteKey(await redisService.keys(`RevokeToken::${userId}::`))
+
+        if (!user) {
+            throw new NotFoundException("user not found")
+        }
+
+
+        return true
+    }
+
+    async logOut(userId: string, jti: string) {
+
+        let addToken = await redisService.set({
+            key: `RevokeToken::${userId}::${jti}`,
+            value: jti,
+            ttl: 31536000
+        })
+
+
+        if (!addToken) {
+            throw new BadRequestException("cant add token")
+        }
+
+        return addToken
+
+    }
+
 }
 
 export default new authService()

@@ -5,6 +5,7 @@ import { SuccessResponse } from "../../common/exceptions/success.response"
 import { signinSchema, signupSchema, verifySchema } from "./auth.validation"
 import { validation } from "../../middleware/validation.middleware"
 import { ConflictException } from "../../common/exceptions/application.exceptions"
+import { authentication } from "../../middleware/auth.middleware"
 
 const router = Router()
 
@@ -98,4 +99,50 @@ router.post("/signup/gmail", async (req: Request, res: Response) => {
     return res.redirect("http://localhost:4200/timeLine")
 })
 
+router.patch("/logout-from-all-devices", authentication, async (req: Request, res: Response) => {
+
+    await authService.logOutFromAllDevices(req.userId)
+
+
+    res.clearCookie("accessToken", {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+
+
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+
+
+    return SuccessResponse({ res, message: 'logged out from all devices successfully', status: 200 })
+
+})
+
+router.post("/logout", authentication, async (req: Request, res: Response) => {
+
+    await authService.logOut(req.userId, req.jti)
+
+
+    res.clearCookie("accessToken", {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+    return SuccessResponse({ res, message: 'logged out successfully', status: 200 })
+
+})
 export default router

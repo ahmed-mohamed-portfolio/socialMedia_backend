@@ -23,7 +23,8 @@ const userSchema = new Schema({
     gender: { type: String, default: enums_1.GenderEnum.male },
     role: { type: Number, default: 1 /* RoleEnum.user */ },
     provider: { type: Number, default: 0 /* ProviderEnum.system */ },
-    confirmEmail: { type: Boolean, default: false }
+    confirmEmail: { type: Boolean, default: false },
+    credentialsUpdatedAt: { type: Date, default: Date.now }
 });
 userSchema
     .virtual("userName")

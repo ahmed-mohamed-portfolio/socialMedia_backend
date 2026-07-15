@@ -49,12 +49,11 @@ class RedisService {
     }
 
     get = async (key: string): Promise<string | null> => {
+
+
         try {
             const data = await this.client.get(key)
 
-            if (!data) {
-                throw new NotFoundException("key not found")
-            }
             return data
         } catch (error) {
             throw new ServiceUnavailableException("Fail in redis get operation", error)

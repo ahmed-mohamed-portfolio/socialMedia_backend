@@ -69,14 +69,12 @@ export class TokenService {
     decodeToken(token: string): string | jwt.JwtPayload {
         let decoded = jwt.decode(token) as JwtPayload
 
-        let signature: string | undefined = undefined
         if (!decoded) {
             throw new BadRequestException("invalid decoded")
         }
 
-        if (!signature) {
-            throw new BadRequestException("invalid signature")
-        }
+        let signature: string | undefined = undefined
+
         switch (decoded.aud) {
             case "Admin":
                 signature = jwt_admin_signature
@@ -119,7 +117,7 @@ export class TokenService {
             throw new BadRequestException("no decodedData.iat")
         }
         if (Math.floor(new Date(user.credentialsUpdatedAt).getTime() / 1000) > decodedData.iat) {
-            throw new BadRequestException("invalid token22")
+            throw new BadRequestException("invalid token2211")
         }
 
         let blocked_Token = await redisService.get(`RevokeToken::${decodedData.id}::${decodedData.jti}`)
