@@ -12,7 +12,7 @@ const user_model_1 = __importDefault(require("../database/model/user.model"));
 const tokenService = new token_service_1.TokenService();
 const userRepository = new base_repository_1.DatabaseRepository(user_model_1.default);
 const authentication = async (req, res, next) => {
-    console.log("!req.cookies.accessToken!req.cookies.accessToken", req.cookies.accessToken);
+    // console.log("!req.cookies.accessToken!req.cookies.accessToken", req.cookies.accessToken);
     if (!req.cookies.accessToken) {
         throw new application_exceptions_1.UnauthorizedException("un authorized");
     }

@@ -27,7 +27,7 @@ class authService {
     async login(data, issuer) {
         let { email, password } = data;
         let existUser = await this.userRepository.findOne({ email });
-        console.log("existUser", existUser);
+        // console.log("existUser", existUser)
         if (existUser) {
             let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password });
             if (isMatched) {
@@ -98,7 +98,7 @@ class authService {
     async loginWithGmail(idToken, issuer) {
         const payload = await this.VerifyGoogleAccount(idToken);
         const user = await this.userRepository.findOne({ email: payload.email });
-        console.log("user", user);
+        // console.log("user", user);
         if (!user) {
             throw new application_exceptions_1.NotFoundException("not registered account");
         }
@@ -111,7 +111,7 @@ class authService {
     }
     signupWithGmail = async (idToken, issuer) => {
         const payload = await this.VerifyGoogleAccount(idToken);
-        console.log("payload", payload);
+        // console.log("payload", payload);
         if (!payload.email) {
             throw new application_exceptions_2.BadRequestException("Google account has no email");
         }

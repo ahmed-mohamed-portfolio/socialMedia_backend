@@ -21,7 +21,7 @@ const userRepository = new DatabaseRepository<IUser>(userModel)
 
 export const authentication = async (req: Request, res: Response, next: NextFunction) => {
 
-    console.log("!req.cookies.accessToken!req.cookies.accessToken", req.cookies.accessToken);
+    // console.log("!req.cookies.accessToken!req.cookies.accessToken", req.cookies.accessToken);
 
     if (!req.cookies.accessToken) {
         throw new UnauthorizedException("un authorized")
