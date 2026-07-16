@@ -2,8 +2,7 @@
 
 import z from "zod"
 import { signupSchema, verifySchema } from "./auth.validation"
-import { ObjectId } from "mongoose"
-import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enums"
+
 
 export interface loginDto {
     email: string
