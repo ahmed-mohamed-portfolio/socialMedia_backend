@@ -13,6 +13,8 @@ const user_model_1 = __importDefault(require("../../database/model/user.model"))
 const token_service_1 = require("../../common/services/token.service");
 const google_auth_library_1 = require("google-auth-library");
 const env_service_1 = require("./../../config/env.service");
+const node_crypto_1 = __importDefault(require("node:crypto"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class authService {
     userModel;
     userRepository;
@@ -154,6 +156,28 @@ class authService {
             throw new application_exceptions_2.BadRequestException("cant add token");
         }
         return addToken;
+    }
+    async generateAccessToken(token) {
+        let decodedData = await this.tokenService.decodeRefreshToken(token);
+        let signature = undefined;
+        switch (decodedData.aud) {
+            case "Admin":
+                signature = env_service_1.jwt_admin_signature;
+                break;
+            case "User":
+                signature = env_service_1.jwt_user_signature;
+                break;
+        }
+        let jwtid = node_crypto_1.default.randomBytes(10).toString("hex");
+        if (!signature) {
+            throw new application_exceptions_2.BadRequestException("bad signature");
+        }
+        let accessToken = jsonwebtoken_1.default.sign({ id: decodedData.id, firstName: decodedData.firstName, lastName: decodedData.lastName, email: decodedData.email }, signature, {
+            expiresIn: '1m',
+            audience: decodedData.aud,
+            jwtid
+        });
+        return accessToken;
     }
 }
 exports.default = new authService();

@@ -5,7 +5,6 @@ import { jwt_admin_refresh_signature, jwt_admin_signature, jwt_user_refresh_sign
 import { DatabaseRepository } from "../../database/repository/base.repository"
 import userModel from "../../database/model/user.model"
 import { redisService } from "./redis.service"
-import { existuser } from "../../modules/auth/auth.dto"
 import { RoleEnum } from "../enums"
 import { IUser } from "../interfaces"
 import { HydratedDocument, Model } from "mongoose"
@@ -44,7 +43,7 @@ export class TokenService {
         }
         //!i put it for test 1m
         let accessToken = jwt.sign({ id: existUser._id, firstName: existUser.firstName, lastName: existUser.lastName, email: existUser.email }, signature, {
-            expiresIn: "10m",
+            expiresIn: "1m",
             issuer,
             audience,
             jwtid

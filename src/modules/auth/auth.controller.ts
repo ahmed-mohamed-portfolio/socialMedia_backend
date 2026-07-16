@@ -145,4 +145,27 @@ router.post("/logout", authentication, async (req: Request, res: Response) => {
     return SuccessResponse({ res, message: 'logged out successfully', status: 200 })
 
 })
+
+
+
+router.get('/generate-access-token', async (req: Request, res: Response) => {
+
+    // console.log("i am here generate-access-tokengenerate-access-token");
+
+    // console.log("req.cookies.refreshTokenreq.cookies.refreshToken", req.cookies.refreshToken);
+
+    let accessToken = await authService.generateAccessToken(req.cookies.refreshToken)
+
+    res.cookie("accessToken", accessToken, {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    })
+    return SuccessResponse({ res, message: 'access token created', status: 200, })
+
+})
+
+
+
 export default router

@@ -106,4 +106,16 @@ router.post("/logout", auth_middleware_1.authentication, async (req, res) => {
     });
     return (0, success_response_1.SuccessResponse)({ res, message: 'logged out successfully', status: 200 });
 });
+router.get('/generate-access-token', async (req, res) => {
+    // console.log("i am here generate-access-tokengenerate-access-token");
+    // console.log("req.cookies.refreshTokenreq.cookies.refreshToken", req.cookies.refreshToken);
+    let accessToken = await auth_service_1.default.generateAccessToken(req.cookies.refreshToken);
+    res.cookie("accessToken", accessToken, {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: false,
+        path: "/"
+    });
+    return (0, success_response_1.SuccessResponse)({ res, message: 'access token created', status: 200, });
+});
 exports.default = router;

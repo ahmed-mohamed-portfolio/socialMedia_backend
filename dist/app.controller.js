@@ -12,6 +12,8 @@ const env_service_1 = require("./config/env.service");
 const connection_1 = __importDefault(require("./database/connection"));
 const redis_service_1 = require("./common/services/redis.service");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const success_response_1 = require("./common/exceptions/success.response");
+const auth_middleware_1 = require("./middleware/auth.middleware");
 const bootstrap = async () => {
     const app = (0, express_1.default)();
     app.use(express_1.default.json());
@@ -34,6 +36,9 @@ const bootstrap = async () => {
         else {
             return res.json({ auth: false });
         }
+    });
+    app.get("/check-health", auth_middleware_1.authentication, (req, res) => {
+        return (0, success_response_1.SuccessResponse)({ res, message: 'health ok', status: 200, });
     });
     app.use(error_middleware_1.globalErrorHandler);
     app.listen(env_service_1.PORT, () => {

@@ -11,7 +11,10 @@ import userModel from "../../database/model/user.model"
 import { ProviderEnum, RoleEnum } from "./../../common/enums/index"
 import { TokenService } from "../../common/services/token.service"
 import { OAuth2Client } from "google-auth-library"
-import { gmail_client_id } from "./../../config/env.service"
+import { gmail_client_id, jwt_admin_signature, jwt_user_signature } from "./../../config/env.service"
+import crypto from "node:crypto"
+import jwt from "jsonwebtoken"
+
 
 class authService {
 
@@ -205,6 +208,46 @@ class authService {
         }
 
         return addToken
+
+    }
+
+
+
+
+
+    async generateAccessToken(token: string) {
+
+        let decodedData = await this.tokenService.decodeRefreshToken(token)
+
+        let signature: string | undefined = undefined
+
+        switch (decodedData.aud) {
+            case "Admin":
+                signature = jwt_admin_signature
+                break;
+
+            case "User":
+                signature = jwt_user_signature
+                break;
+        }
+
+        let jwtid: string = crypto.randomBytes(10).toString("hex")
+
+
+        if (!signature) {
+            throw new BadRequestException("bad signature")
+        }
+
+        let accessToken = jwt.sign({ id: decodedData.id, firstName: decodedData.firstName, lastName: decodedData.lastName, email: decodedData.email }, signature, {
+            expiresIn: '1m',
+            audience: decodedData.aud,
+            jwtid
+        })
+
+
+
+        return accessToken
+
 
     }
 

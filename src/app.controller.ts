@@ -7,6 +7,8 @@ import { PORT } from "./config/env.service"
 import DBconnection from "./database/connection"
 import { redisService } from "./common/services/redis.service"
 import cookieParser from "cookie-parser"
+import { SuccessResponse } from "./common/exceptions/success.response"
+import { authentication } from "./middleware/auth.middleware"
 
 
 export const bootstrap = async (): Promise<void> => {
@@ -37,6 +39,12 @@ export const bootstrap = async (): Promise<void> => {
         } else {
             return res.json({ auth: false })
         }
+
+    })
+
+
+    app.get("/check-health", authentication, (req, res) => {
+        return SuccessResponse({ res, message: 'health ok', status: 200, })
 
     })
 
