@@ -146,8 +146,6 @@ router.post("/logout", authentication, async (req: Request, res: Response) => {
 
 })
 
-
-
 router.get('/generate-access-token', async (req: Request, res: Response) => {
 
     // console.log("i am here generate-access-tokengenerate-access-token");
