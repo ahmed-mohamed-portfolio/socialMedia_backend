@@ -276,7 +276,7 @@ class authService {
     async profileImage(file: Express.Multer.File, userId: string) {
 
         const user: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
-        console.log(user);
+        console.log("user", user);
 
         if (!user) {
             throw new NotFoundException("user NOt Found")
@@ -284,9 +284,11 @@ class authService {
 
         console.log("file", file);
 
-        user.profilePic = await this.s3.uploadAsset({ file, path: `Users/${user.id.toString()}/Profile`, StorageApproach: StorageApproachEnum.DISK })
-        await user.save()
+        const { Key } = await this.s3.uploadLargeAsset({ file, path: `Users/${user.id.toString()}/Profile`, StorageApproach: StorageApproachEnum.DISK, partSize: 5 })
 
+        console.log("{ Key }", { Key });
+        user.profilePic = Key
+        await user.save()
         return user.toJSON()
     }
 }

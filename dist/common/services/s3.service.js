@@ -7,6 +7,7 @@ const config_1 = require("../../config");
 const application_exceptions_1 = require("../exceptions/application.exceptions");
 const enums_1 = require("../enums");
 const node_fs_1 = require("node:fs");
+const lib_storage_1 = require("@aws-sdk/lib-storage");
 class S3Service {
     client;
     constructor() {
@@ -41,6 +42,24 @@ class S3Service {
         console.log(command);
         await this.client.send(command);
         return command.input?.Key;
+    }
+    async uploadLargeAsset({ StorageApproach = enums_1.StorageApproachEnum.DISK, Bucket = config_1.AWS_BUCKET_NAME, path = 'general', file, ACL = client_s3_1.ObjectCannedACL.private, ContentType, partSize = 5 }) {
+        const uploadFile = new lib_storage_1.Upload({
+            client: this.client,
+            params: {
+                Bucket,
+                Key: `${config_1.APPLICATION_NAME}/${path}/${(0, node_crypto_1.randomUUID)()}__${file.originalname}`,
+                ACL,
+                Body: (StorageApproach === enums_1.StorageApproachEnum.MEMORY) ? file.buffer : (0, node_fs_1.createReadStream)(file.path),
+                ContentType: file.mimetype || ContentType,
+            },
+            partSize: partSize * 1024 * 1024
+        });
+        uploadFile.on('httpUploadProgress', (progress) => {
+            console.log("progress", progress);
+            console.log(`File Upload is ${(progress.loaded / progress.total) * 100}%`);
+        });
+        return await uploadFile.done();
     }
 }
 exports.S3Service = S3Service;

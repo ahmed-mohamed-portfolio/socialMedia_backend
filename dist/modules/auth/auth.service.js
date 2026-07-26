@@ -196,12 +196,14 @@ class authService {
     }
     async profileImage(file, userId) {
         const user = await this.userRepository.findById(userId, '-password');
-        console.log(user);
+        console.log("user", user);
         if (!user) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }
         console.log("file", file);
-        user.profilePic = await this.s3.uploadAsset({ file, path: `Users/${user.id.toString()}/Profile`, StorageApproach: multer_enum_1.StorageApproachEnum.DISK });
+        const { Key } = await this.s3.uploadLargeAsset({ file, path: `Users/${user.id.toString()}/Profile`, StorageApproach: multer_enum_1.StorageApproachEnum.DISK, partSize: 5 });
+        console.log("{ Key }", { Key });
+        user.profilePic = Key;
         await user.save();
         return user.toJSON();
     }

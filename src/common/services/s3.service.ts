@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { CompleteMultipartUploadCommandOutput, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { APPLICATION_NAME, AWS_ACCESS_KEY_ID, AWS_BUCKET_NAME, AWS_REGION, AWS_SECRET_ACCESS_KEY } from "../../config";
 import { BadRequestException } from '../exceptions/application.exceptions';
 import { StorageApproachEnum } from '../enums';
 import { createReadStream } from 'node:fs';
+import { Upload } from '@aws-sdk/lib-storage';
 
 
 
@@ -63,6 +64,47 @@ export class S3Service {
         await this.client.send(command);
 
         return command.input?.Key
+    }
+
+
+
+
+    async uploadLargeAsset({
+        StorageApproach = StorageApproachEnum.DISK,
+        Bucket = AWS_BUCKET_NAME,
+        path = 'general',
+        file,
+        ACL = ObjectCannedACL.private,
+        ContentType,
+        partSize = 5
+    }: {
+        StorageApproach?: StorageApproachEnum;
+        Bucket?: string;
+        path?: string;
+        file: Express.Multer.File;
+        ACL?: ObjectCannedACL;
+        ContentType?: string;
+        partSize: number;
+    }): Promise<CompleteMultipartUploadCommandOutput> {
+        const uploadFile = new Upload({
+            client: this.client,
+            params: {
+                Bucket,
+                Key: `${APPLICATION_NAME}/${path}/${randomUUID()}__${file.originalname}`,
+                ACL,
+                Body: (StorageApproach === StorageApproachEnum.MEMORY) ? file.buffer : createReadStream(file.path),
+                ContentType: file.mimetype || ContentType,
+            },
+            partSize: partSize * 1024 * 1024
+        });
+
+        uploadFile.on('httpUploadProgress', (progress) => {
+            console.log("progress", progress);
+
+            console.log(`File Upload is ${((progress.loaded as number) / (progress.total as number)) * 100}%`,);
+        });
+
+        return await uploadFile.done();
     }
 }
 

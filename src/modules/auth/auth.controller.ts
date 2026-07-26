@@ -178,7 +178,7 @@ router.get('/get-user-profile', authentication, async (req: Request, res: Respon
     SuccessResponse({ res, message: "done", status: 200, data: userData })
 })
 
-router.patch('/profile-image', authentication, cloudeFileUpload({ StorageApproach: StorageApproachEnum.DISK, validation: fileFieldValidation.image, maxSize: 2 }).single("attachment"), async (req: Request, res: Response) => {
+router.patch('/profile-image', authentication, cloudeFileUpload({ StorageApproach: StorageApproachEnum.DISK, validation: fileFieldValidation.video, maxSize: 200 }).single("attachment"), async (req: Request, res: Response) => {
 
     let userData = await authService.profileImage(req.file as Express.Multer.File, req.userId)
 
