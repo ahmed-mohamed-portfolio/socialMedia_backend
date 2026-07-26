@@ -1,3 +1,4 @@
+import { StorageApproachEnum } from './../../common/enums/multer.enum';
 import { DatabaseRepository } from "./../../database/repository/base.repository"
 import { SecurityService } from "./../../common/services/security.services"
 import { HydratedDocument, Model } from "mongoose"
@@ -14,6 +15,7 @@ import { OAuth2Client } from "google-auth-library"
 import { gmail_client_id, jwt_admin_signature, jwt_user_signature } from "./../../config/env.service"
 import crypto from "node:crypto"
 import jwt from "jsonwebtoken"
+import { s3Service, S3Service } from "../../common/services/s3.service"
 
 
 class authService {
@@ -22,11 +24,13 @@ class authService {
     private userRepository: DatabaseRepository<IUser>
     private securityService: SecurityService
     private tokenService: TokenService
+    private s3: S3Service
     constructor() {
         this.userModel = userModel
         this.userRepository = new DatabaseRepository(this.userModel)
         this.securityService = new SecurityService()
         this.tokenService = new TokenService()
+        this.s3 = s3Service
     }
 
     async login(data: loginDto, issuer: string) {
@@ -272,14 +276,16 @@ class authService {
     async profileImage(file: Express.Multer.File, userId: string) {
 
         const user: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
-        // console.log(user);
+        console.log(user);
 
         if (!user) {
             throw new NotFoundException("user NOt Found")
         }
 
-
         console.log("file", file);
+
+        user.profilePic = await this.s3.uploadAsset({ file, path: `Users/${user.id.toString()}/Profile`, StorageApproach: StorageApproachEnum.DISK })
+        await user.save()
 
         return user.toJSON()
     }

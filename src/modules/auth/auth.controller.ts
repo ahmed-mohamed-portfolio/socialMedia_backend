@@ -178,16 +178,15 @@ router.get('/get-user-profile', authentication, async (req: Request, res: Respon
     SuccessResponse({ res, message: "done", status: 200, data: userData })
 })
 
-router.patch('/profile-image', authentication, cloudeFileUpload({ StorageApproach: StorageApproachEnum.DISK, validation: fileFieldValidation.image, maxSize: 0 }).single("attachment"), async (req: Request, res: Response) => {
-    // console.log("req.file", req.file);
+router.patch('/profile-image', authentication, cloudeFileUpload({ StorageApproach: StorageApproachEnum.DISK, validation: fileFieldValidation.image, maxSize: 2 }).single("attachment"), async (req: Request, res: Response) => {
 
-    // let userData = await authService.profileImage(req.file as Express.Multer.File, req.userId)
+    let userData = await authService.profileImage(req.file as Express.Multer.File, req.userId)
 
-    // if (!userData) {
-    //     throw new BadRequestException("cant get user")
-    // }
+    if (!userData) {
+        throw new BadRequestException("cant uploade image")
+    }
 
-    SuccessResponse({ res, data: { file: req.file } })
+    SuccessResponse({ res, data: userData })
 })
 
 export default router

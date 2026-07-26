@@ -16,7 +16,12 @@ let gmail_client_id = process.env.GMAIL_CLIENT_ID
 let redis_uri = process.env.REDIS_URI
 let nodeMailer_app_password = process.env.NODEMAILER_APP_PASSWORD as string
 let nodeMailer_app_email = process.env.NODEMAILER_APP_EMAIL as string
-
+let AWS_REGION = process.env.AWS_REGION as string
+let AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME as string
+let AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID as string
+let AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY as string
+let AWS_EXPIRES_IN = process.env.AWS_EXPIRES_IN as string
+let APPLICATION_NAME = process.env.APPLICATION_NAME as string
 export {
     PORT,
     MONGODB_URL,
@@ -30,5 +35,11 @@ export {
     gmail_client_id,
     redis_uri,
     nodeMailer_app_password,
-    nodeMailer_app_email
+    nodeMailer_app_email,
+    AWS_REGION,
+    AWS_BUCKET_NAME,
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+    AWS_EXPIRES_IN,
+    APPLICATION_NAME
 }

@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const multer_enum_1 = require("./../../common/enums/multer.enum");
 const base_repository_1 = require("./../../database/repository/base.repository");
 const security_services_1 = require("./../../common/services/security.services");
 const application_exceptions_1 = require("./../../common/exceptions/application.exceptions");
@@ -15,16 +16,19 @@ const google_auth_library_1 = require("google-auth-library");
 const env_service_1 = require("./../../config/env.service");
 const node_crypto_1 = __importDefault(require("node:crypto"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const s3_service_1 = require("../../common/services/s3.service");
 class authService {
     userModel;
     userRepository;
     securityService;
     tokenService;
+    s3;
     constructor() {
         this.userModel = user_model_1.default;
         this.userRepository = new base_repository_1.DatabaseRepository(this.userModel);
         this.securityService = new security_services_1.SecurityService();
         this.tokenService = new token_service_1.TokenService();
+        this.s3 = s3_service_1.s3Service;
     }
     async login(data, issuer) {
         let { email, password } = data;
@@ -192,11 +196,13 @@ class authService {
     }
     async profileImage(file, userId) {
         const user = await this.userRepository.findById(userId, '-password');
-        // console.log(user);
+        console.log(user);
         if (!user) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }
         console.log("file", file);
+        user.profilePic = await this.s3.uploadAsset({ file, path: `Users/${user.id.toString()}/Profile`, StorageApproach: multer_enum_1.StorageApproachEnum.DISK });
+        await user.save();
         return user.toJSON();
     }
 }
