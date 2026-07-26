@@ -4,8 +4,10 @@ import authService from "./auth.service"
 import { SuccessResponse } from "../../common/exceptions/success.response"
 import { signinSchema, signupSchema, verifySchema } from "./auth.validation"
 import { validation } from "../../middleware/validation.middleware"
-import { ConflictException } from "../../common/exceptions/application.exceptions"
+import { BadRequestException, ConflictException } from "../../common/exceptions/application.exceptions"
 import { authentication } from "../../middleware/auth.middleware"
+import { cloudeFileUpload, fileFieldValidation } from "../../common/utils/multer"
+import { StorageApproachEnum } from "../../common/enums"
 
 const router = Router()
 
@@ -164,6 +166,28 @@ router.get('/generate-access-token', async (req: Request, res: Response) => {
 
 })
 
+router.get('/get-user-profile', authentication, async (req: Request, res: Response) => {
+    console.log("req.userId", req.userId);
 
+    let userData = await authService.getUserProfile(req.userId)
+
+    if (!userData) {
+        throw new BadRequestException("cant get user")
+    }
+
+    SuccessResponse({ res, message: "done", status: 200, data: userData })
+})
+
+router.patch('/profile-image', authentication, cloudeFileUpload({ StorageApproach: StorageApproachEnum.DISK, validation: fileFieldValidation.image, maxSize: 0 }).single("attachment"), async (req: Request, res: Response) => {
+    // console.log("req.file", req.file);
+
+    // let userData = await authService.profileImage(req.file as Express.Multer.File, req.userId)
+
+    // if (!userData) {
+    //     throw new BadRequestException("cant get user")
+    // }
+
+    SuccessResponse({ res, data: { file: req.file } })
+})
 
 export default router

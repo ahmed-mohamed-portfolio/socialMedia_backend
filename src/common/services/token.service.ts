@@ -43,7 +43,7 @@ export class TokenService {
         }
         //!i put it for test 1m
         let accessToken = jwt.sign({ id: existUser._id, firstName: existUser.firstName, lastName: existUser.lastName, email: existUser.email }, signature, {
-            expiresIn: "1m",
+            expiresIn: "1000m",
             issuer,
             audience,
             jwtid

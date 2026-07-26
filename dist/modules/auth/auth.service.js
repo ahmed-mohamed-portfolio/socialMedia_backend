@@ -30,6 +30,9 @@ class authService {
         let { email, password } = data;
         let existUser = await this.userRepository.findOne({ email });
         // console.log("existUser", existUser)
+        // if (!existUser.confirmEmail) {
+        //     throw new BadRequestException("email not confirmed")
+        // }
         if (existUser) {
             let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password });
             if (isMatched) {
@@ -178,6 +181,23 @@ class authService {
             jwtid
         });
         return accessToken;
+    }
+    async getUserProfile(userId) {
+        const userInfo = await this.userRepository.findById(userId, '-password');
+        console.log(userInfo);
+        if (!userInfo) {
+            throw new application_exceptions_1.NotFoundException("user NOt Found");
+        }
+        return userInfo;
+    }
+    async profileImage(file, userId) {
+        const user = await this.userRepository.findById(userId, '-password');
+        // console.log(user);
+        if (!user) {
+            throw new application_exceptions_1.NotFoundException("user NOt Found");
+        }
+        console.log("file", file);
+        return user.toJSON();
     }
 }
 exports.default = new authService();

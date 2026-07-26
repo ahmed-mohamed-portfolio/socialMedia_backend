@@ -34,6 +34,10 @@ class authService {
         let existUser = await this.userRepository.findOne({ email },)
         // console.log("existUser", existUser)
 
+        // if (!existUser.confirmEmail) {
+        //     throw new BadRequestException("email not confirmed")
+        // }
+
         if (existUser) {
             let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password })
 
@@ -251,6 +255,34 @@ class authService {
 
     }
 
+
+
+    async getUserProfile(userId: string): Promise<HydratedDocument<IUser>> {
+        const userInfo: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
+        console.log(userInfo);
+
+        if (!userInfo) {
+            throw new NotFoundException("user NOt Found")
+        }
+
+        return userInfo
+
+    }
+
+    async profileImage(file: Express.Multer.File, userId: string) {
+
+        const user: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
+        // console.log(user);
+
+        if (!user) {
+            throw new NotFoundException("user NOt Found")
+        }
+
+
+        console.log("file", file);
+
+        return user.toJSON()
+    }
 }
 
 export default new authService()

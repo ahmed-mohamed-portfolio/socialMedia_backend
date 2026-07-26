@@ -10,6 +10,8 @@ const auth_validation_1 = require("./auth.validation");
 const validation_middleware_1 = require("../../middleware/validation.middleware");
 const application_exceptions_1 = require("../../common/exceptions/application.exceptions");
 const auth_middleware_1 = require("../../middleware/auth.middleware");
+const multer_1 = require("../../common/utils/multer");
+const enums_1 = require("../../common/enums");
 const router = (0, express_1.Router)();
 router.post("/signin", (0, validation_middleware_1.validation)(auth_validation_1.signinSchema), async (req, res) => {
     let host = `${req.protocol}://${req.host}`;
@@ -117,5 +119,21 @@ router.get('/generate-access-token', async (req, res) => {
         path: "/"
     });
     return (0, success_response_1.SuccessResponse)({ res, message: 'access token created', status: 200, });
+});
+router.get('/get-user-profile', auth_middleware_1.authentication, async (req, res) => {
+    console.log("req.userId", req.userId);
+    let userData = await auth_service_1.default.getUserProfile(req.userId);
+    if (!userData) {
+        throw new application_exceptions_1.BadRequestException("cant get user");
+    }
+    (0, success_response_1.SuccessResponse)({ res, message: "done", status: 200, data: userData });
+});
+router.patch('/profile-image', auth_middleware_1.authentication, (0, multer_1.cloudeFileUpload)({ StorageApproach: enums_1.StorageApproachEnum.DISK, validation: multer_1.fileFieldValidation.image, maxSize: 0 }).single("attachment"), async (req, res) => {
+    // console.log("req.file", req.file);
+    // let userData = await authService.profileImage(req.file as Express.Multer.File, req.userId)
+    // if (!userData) {
+    //     throw new BadRequestException("cant get user")
+    // }
+    (0, success_response_1.SuccessResponse)({ res, data: { file: req.file } });
 });
 exports.default = router;
