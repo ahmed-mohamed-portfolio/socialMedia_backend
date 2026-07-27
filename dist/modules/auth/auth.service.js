@@ -207,5 +207,18 @@ class authService {
         await user.save();
         return user.toJSON();
     }
+    async profileCoverImages(files, userId) {
+        const user = await this.userRepository.findById(userId, '-password');
+        console.log("user", user);
+        if (!user) {
+            throw new application_exceptions_1.NotFoundException("user NOt Found");
+        }
+        console.log("files", files);
+        const urls = await this.s3.uploadAssets({ files, path: `Users/${user.id.toString()}/Profile/cover`, StorageApproach: multer_enum_1.StorageApproachEnum.DISK, UploadApproach: multer_enum_1.UploadApproachEnum.LARGE });
+        console.log("urls", urls);
+        user.profileCoverPic = urls;
+        await user.save();
+        return user.toJSON();
+    }
 }
 exports.default = new authService();

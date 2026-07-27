@@ -189,4 +189,16 @@ router.patch('/profile-image', authentication, cloudeFileUpload({ StorageApproac
     SuccessResponse({ res, data: userData })
 })
 
+
+router.patch('/profile-cover-images', authentication, cloudeFileUpload({ StorageApproach: StorageApproachEnum.DISK, validation: fileFieldValidation.image, maxSize: 20 }).array("attachments", 2), async (req: Request, res: Response) => {
+    console.log("req.files", req.files);
+
+    let userData = await authService.profileCoverImages(req.files as Express.Multer.File[], req.userId)
+
+    if (!userData) {
+        throw new BadRequestException("cant uploade images")
+    }
+
+    SuccessResponse({ res, data: userData })
+})
 export default router

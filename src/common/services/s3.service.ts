@@ -1,3 +1,4 @@
+import { UploadApproachEnum } from './../enums/multer.enum';
 import { randomUUID } from 'node:crypto';
 import { CompleteMultipartUploadCommandOutput, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { APPLICATION_NAME, AWS_ACCESS_KEY_ID, AWS_BUCKET_NAME, AWS_REGION, AWS_SECRET_ACCESS_KEY } from "../../config";
@@ -35,9 +36,9 @@ export class S3Service {
         path?: string,
         file: Express.Multer.File,
         ACL?: ObjectCannedACL,
-        ContentType?: string,
+        ContentType?: string | undefined,
         StorageApproach: StorageApproachEnum
-    }) {
+    }): Promise<string> {
 
         const command = new PutObjectCommand({
             Bucket,
@@ -66,9 +67,6 @@ export class S3Service {
         return command.input?.Key
     }
 
-
-
-
     async uploadLargeAsset({
         StorageApproach = StorageApproachEnum.DISK,
         Bucket = AWS_BUCKET_NAME,
@@ -83,8 +81,8 @@ export class S3Service {
         path?: string;
         file: Express.Multer.File;
         ACL?: ObjectCannedACL;
-        ContentType?: string;
-        partSize: number;
+        ContentType?: string | undefined;
+        partSize?: number;
     }): Promise<CompleteMultipartUploadCommandOutput> {
         const uploadFile = new Upload({
             client: this.client,
@@ -106,6 +104,47 @@ export class S3Service {
 
         return await uploadFile.done();
     }
+
+    async uploadAssets({
+        Bucket = AWS_BUCKET_NAME,
+        path = "general",
+        files,
+        ACL = ObjectCannedACL.private,
+        ContentType,
+        StorageApproach = StorageApproachEnum.MEMORY,
+        UploadApproach = UploadApproachEnum.SMALL
+    }: {
+        Bucket?: string,
+        path?: string,
+        files: Express.Multer.File[],
+        ACL?: ObjectCannedACL,
+        ContentType?: string | undefined,
+        StorageApproach: StorageApproachEnum,
+        UploadApproach: UploadApproachEnum
+    }): Promise<string[]> {
+
+        let urls: string[] = []
+
+        if (UploadApproach === UploadApproachEnum.LARGE) {
+            const data = await Promise.all(
+                files.map((file) => {
+                    return this.uploadLargeAsset({ Bucket, path, file, ACL, ContentType, StorageApproach })
+                })
+            )
+
+            urls = data.map((ele) => ele.Key as string)
+
+        } else {
+            urls = await Promise.all(
+                files.map((file) => {
+                    return this.uploadAsset({ Bucket, path, file, ACL, ContentType, StorageApproach })
+                })
+            )
+        }
+
+        return urls
+    }
+
 }
 
 

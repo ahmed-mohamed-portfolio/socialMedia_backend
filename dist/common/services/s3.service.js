@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.s3Service = exports.S3Service = void 0;
+const multer_enum_1 = require("./../enums/multer.enum");
 const node_crypto_1 = require("node:crypto");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const config_1 = require("../../config");
@@ -60,6 +61,21 @@ class S3Service {
             console.log(`File Upload is ${(progress.loaded / progress.total) * 100}%`);
         });
         return await uploadFile.done();
+    }
+    async uploadAssets({ Bucket = config_1.AWS_BUCKET_NAME, path = "general", files, ACL = client_s3_1.ObjectCannedACL.private, ContentType, StorageApproach = enums_1.StorageApproachEnum.MEMORY, UploadApproach = multer_enum_1.UploadApproachEnum.SMALL }) {
+        let urls = [];
+        if (UploadApproach === multer_enum_1.UploadApproachEnum.LARGE) {
+            const data = await Promise.all(files.map((file) => {
+                return this.uploadLargeAsset({ Bucket, path, file, ACL, ContentType, StorageApproach });
+            }));
+            urls = data.map((ele) => ele.Key);
+        }
+        else {
+            urls = await Promise.all(files.map((file) => {
+                return this.uploadAsset({ Bucket, path, file, ACL, ContentType, StorageApproach });
+            }));
+        }
+        return urls;
     }
 }
 exports.S3Service = S3Service;

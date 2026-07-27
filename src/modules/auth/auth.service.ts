@@ -1,4 +1,4 @@
-import { StorageApproachEnum } from './../../common/enums/multer.enum';
+import { StorageApproachEnum, UploadApproachEnum } from './../../common/enums/multer.enum';
 import { DatabaseRepository } from "./../../database/repository/base.repository"
 import { SecurityService } from "./../../common/services/security.services"
 import { HydratedDocument, Model } from "mongoose"
@@ -288,6 +288,29 @@ class authService {
 
         console.log("{ Key }", { Key });
         user.profilePic = Key
+        await user.save()
+        return user.toJSON()
+    }
+
+
+
+
+
+    async profileCoverImages(files: Express.Multer.File[], userId: string) {
+
+        const user: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
+        console.log("user", user);
+
+        if (!user) {
+            throw new NotFoundException("user NOt Found")
+        }
+
+        console.log("files", files);
+
+        const urls = await this.s3.uploadAssets({ files, path: `Users/${user.id.toString()}/Profile/cover`, StorageApproach: StorageApproachEnum.DISK, UploadApproach: UploadApproachEnum.LARGE })
+
+        console.log("urls", urls);
+        user.profileCoverPic = urls
         await user.save()
         return user.toJSON()
     }
