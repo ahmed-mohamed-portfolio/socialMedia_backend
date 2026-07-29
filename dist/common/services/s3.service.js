@@ -9,6 +9,7 @@ const application_exceptions_1 = require("../exceptions/application.exceptions")
 const enums_1 = require("../enums");
 const node_fs_1 = require("node:fs");
 const lib_storage_1 = require("@aws-sdk/lib-storage");
+const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 class S3Service {
     client;
     constructor() {
@@ -76,6 +77,18 @@ class S3Service {
             }));
         }
         return urls;
+    }
+    async createPreSignedUploadLink({ Bucket = config_1.AWS_BUCKET_NAME, path = "general", expiresIn = parseInt(config_1.AWS_EXPIRES_IN), Originalname, ContentType, }) {
+        const command = new client_s3_1.PutObjectCommand({
+            Bucket,
+            Key: `${config_1.APPLICATION_NAME}/${path}/${(0, node_crypto_1.randomUUID)()}__${Originalname}`,
+            ContentType
+        });
+        if (!command.input?.Key) {
+            throw new application_exceptions_1.BadRequestException("Fail to upload this asset");
+        }
+        const url = await (0, s3_request_presigner_1.getSignedUrl)(this.client, command, { expiresIn });
+        return { url, key: command.input.Key };
     }
 }
 exports.S3Service = S3Service;

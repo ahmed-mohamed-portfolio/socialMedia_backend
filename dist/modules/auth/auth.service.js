@@ -207,6 +207,19 @@ class authService {
         await user.save();
         return user.toJSON();
     }
+    async profileImageByPreSignedLink({ Originalname, ContentType }, userId) {
+        const user = await this.userRepository.findById(userId, '-password');
+        console.log("user", user);
+        if (!user) {
+            throw new application_exceptions_1.NotFoundException("user NOt Found");
+        }
+        const { url, key } = await this.s3.createPreSignedUploadLink({ Originalname, ContentType, path: `Users/${user.id.toString()}/Profile` });
+        console.log("{ Key }", { key });
+        console.log("{ url }", { url });
+        user.profilePic = key;
+        await user.save();
+        return { url, user };
+    }
     async profileCoverImages(files, userId) {
         const user = await this.userRepository.findById(userId, '-password');
         console.log("user", user);

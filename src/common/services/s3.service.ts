@@ -1,11 +1,12 @@
 import { UploadApproachEnum } from './../enums/multer.enum';
 import { randomUUID } from 'node:crypto';
 import { CompleteMultipartUploadCommandOutput, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { APPLICATION_NAME, AWS_ACCESS_KEY_ID, AWS_BUCKET_NAME, AWS_REGION, AWS_SECRET_ACCESS_KEY } from "../../config";
+import { APPLICATION_NAME, AWS_ACCESS_KEY_ID, AWS_BUCKET_NAME, AWS_EXPIRES_IN, AWS_REGION, AWS_SECRET_ACCESS_KEY } from "../../config";
 import { BadRequestException } from '../exceptions/application.exceptions';
 import { StorageApproachEnum } from '../enums';
 import { createReadStream } from 'node:fs';
 import { Upload } from '@aws-sdk/lib-storage';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 
 
@@ -143,6 +144,41 @@ export class S3Service {
         }
 
         return urls
+    }
+
+
+
+
+
+    async createPreSignedUploadLink({
+        Bucket = AWS_BUCKET_NAME,
+        path = "general",
+        expiresIn = parseInt(AWS_EXPIRES_IN),
+        Originalname,
+        ContentType,
+    }: {
+        Bucket?: string,
+        path?: string,
+        expiresIn?: number,
+        Originalname: string,
+        ContentType: string,
+    }): Promise<{ url: string, key: string }> {
+
+        const command = new PutObjectCommand({
+            Bucket,
+            Key: `${APPLICATION_NAME}/${path}/${randomUUID()}__${Originalname}`,
+            ContentType
+        })
+
+        if (!command.input?.Key) {
+            throw new BadRequestException("Fail to upload this asset")
+        }
+
+
+        const url = await getSignedUrl(this.client, command, { expiresIn })
+
+        return { url, key: command.input.Key }
+
     }
 
 }

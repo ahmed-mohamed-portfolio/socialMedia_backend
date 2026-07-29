@@ -135,6 +135,13 @@ router.patch('/profile-image', auth_middleware_1.authentication, (0, multer_1.cl
     }
     (0, success_response_1.SuccessResponse)({ res, data: userData });
 });
+router.patch('/profile-image-byPreSignedLink', auth_middleware_1.authentication, async (req, res) => {
+    let userData = await auth_service_1.default.profileImageByPreSignedLink(req.body, req.userId);
+    if (!userData) {
+        throw new application_exceptions_1.BadRequestException("cant get preSignedLink");
+    }
+    (0, success_response_1.SuccessResponse)({ res, data: userData });
+});
 router.patch('/profile-cover-images', auth_middleware_1.authentication, (0, multer_1.cloudeFileUpload)({ StorageApproach: enums_1.StorageApproachEnum.DISK, validation: multer_1.fileFieldValidation.image, maxSize: 20 }).array("attachments", 2), async (req, res) => {
     console.log("req.files", req.files);
     let userData = await auth_service_1.default.profileCoverImages(req.files, req.userId);

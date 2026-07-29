@@ -219,10 +219,6 @@ class authService {
 
     }
 
-
-
-
-
     async generateAccessToken(token: string) {
 
         let decodedData = await this.tokenService.decodeRefreshToken(token)
@@ -259,8 +255,6 @@ class authService {
 
     }
 
-
-
     async getUserProfile(userId: string): Promise<HydratedDocument<IUser>> {
         const userInfo: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
         console.log(userInfo);
@@ -292,9 +286,24 @@ class authService {
         return user.toJSON()
     }
 
+    async profileImageByPreSignedLink({ Originalname, ContentType }: { Originalname: string, ContentType: string }, userId: string): Promise<{ user: IUser, url: string }> {
+
+        const user: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
+        console.log("user", user);
+
+        if (!user) {
+            throw new NotFoundException("user NOt Found")
+        }
 
 
+        const { url, key } = await this.s3.createPreSignedUploadLink({ Originalname, ContentType, path: `Users/${user.id.toString()}/Profile` })
 
+        console.log("{ Key }", { key });
+        console.log("{ url }", { url });
+        user.profilePic = key
+        await user.save()
+        return { url, user }
+    }
 
     async profileCoverImages(files: Express.Multer.File[], userId: string) {
 
