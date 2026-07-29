@@ -1,6 +1,6 @@
 import { UploadApproachEnum } from './../enums/multer.enum';
 import { randomUUID } from 'node:crypto';
-import { CompleteMultipartUploadCommandOutput, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { CompleteMultipartUploadCommandOutput, GetObjectCommand, GetObjectCommandOutput, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { APPLICATION_NAME, AWS_ACCESS_KEY_ID, AWS_BUCKET_NAME, AWS_EXPIRES_IN, AWS_REGION, AWS_SECRET_ACCESS_KEY } from "../../config";
 import { BadRequestException } from '../exceptions/application.exceptions';
 import { StorageApproachEnum } from '../enums';
@@ -177,6 +177,22 @@ export class S3Service {
 
     }
 
+    async getAsset({
+        Bucket = AWS_BUCKET_NAME,
+        Key,
+    }: {
+        Bucket?: string,
+        Key: string,
+    }): Promise<GetObjectCommandOutput> {
+
+        const command = new GetObjectCommand({
+            Bucket,
+            Key
+        })
+
+        return await this.client.send(command);
+
+    }
 
 
 }

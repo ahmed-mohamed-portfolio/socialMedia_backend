@@ -9,7 +9,11 @@ import { redisService } from "./common/services/redis.service"
 import cookieParser from "cookie-parser"
 import { SuccessResponse } from "./common/exceptions/success.response"
 import { authentication } from "./middleware/auth.middleware"
+import { s3Service } from "./common/services/s3.service"
+import { pipeline } from 'node:stream'
+import { promisify } from "node:util"
 
+const s3WriteStream = promisify(pipeline)
 
 export const bootstrap = async (): Promise<void> => {
     const app: Express = express()
@@ -27,11 +31,12 @@ export const bootstrap = async (): Promise<void> => {
     app.use("/users", authRouter);
 
 
+
     await redisService.connect()
     await DBconnection()
 
 
-    app.get("/get-cookie", (req, res) => {
+    app.get("/get-cookie", (req: Request, res: Response) => {
 
         if (req.cookies.accessToken) {
 
@@ -39,6 +44,28 @@ export const bootstrap = async (): Promise<void> => {
         } else {
             return res.json({ auth: false })
         }
+
+    })
+
+    app.get('/uploads/*path', async (req: Request, res: Response) => {
+        const { download, fileName } = req.query as { download: string, fileName: string }
+
+        const { path } = req.params as { path: string[] }
+        const Key = path.join('/')
+        console.log("i am here");
+        const { Body, ContentType } = await s3Service.getAsset({ Key })
+        console.log({ Body, ContentType });
+        res.setHeader(
+            "Content-Type",
+            ContentType || "application/octet-stream"
+        );
+        res.set("Cross-Origin-Resource-Policy", "cross-origin");
+        if (download === 'true') {
+
+            res.setHeader("Content-Disposition", `attachment; filename="${fileName || Key.split("/").pop()}"`); // only apply it for  download
+        }
+
+        return await s3WriteStream(Body as NodeJS.ReadableStream, res)
 
     })
 

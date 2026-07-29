@@ -128,7 +128,7 @@ router.get('/get-user-profile', auth_middleware_1.authentication, async (req, re
     }
     (0, success_response_1.SuccessResponse)({ res, message: "done", status: 200, data: userData });
 });
-router.patch('/profile-image', auth_middleware_1.authentication, (0, multer_1.cloudeFileUpload)({ StorageApproach: enums_1.StorageApproachEnum.DISK, validation: multer_1.fileFieldValidation.video, maxSize: 200 }).single("attachment"), async (req, res) => {
+router.patch('/profile-image', auth_middleware_1.authentication, (0, multer_1.cloudeFileUpload)({ StorageApproach: enums_1.StorageApproachEnum.DISK, validation: multer_1.fileFieldValidation.image, maxSize: 200 }).single("attachment"), async (req, res) => {
     let userData = await auth_service_1.default.profileImage(req.file, req.userId);
     if (!userData) {
         throw new application_exceptions_1.BadRequestException("cant uploade image");
