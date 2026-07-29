@@ -194,6 +194,34 @@ export class S3Service {
 
     }
 
+    async createPreSignedFetchLink({
+        Bucket = AWS_BUCKET_NAME,
+        Key,
+        expiresIn = parseInt(AWS_EXPIRES_IN),
+        fileName,
+        download
+
+    }: {
+        Bucket?: string,
+        Key: string,
+        expiresIn?: number,
+        fileName?: string,
+        download?: string
+
+    }): Promise<string> {
+
+        const command = new GetObjectCommand({
+            Bucket,
+            Key,
+            ResponseContentDisposition: download === "true" ? `attachment; filename="${fileName || Key.split("/").pop()}"` : undefined
+
+        })
+
+        const url = await getSignedUrl(this.client, command, { expiresIn })
+
+        return url
+
+    }
 
 }
 

@@ -70,6 +70,18 @@ export const bootstrap = async (): Promise<void> => {
     })
 
 
+    app.get('/pre-signed/*path', async (req: Request, res: Response) => {
+        const { download, fileName } = req.query as { download: string, fileName: string }
+
+        const { path } = req.params as { path: string[] }
+        const Key = path.join('/')
+
+
+        const url = await s3Service.createPreSignedFetchLink({ Key, download, fileName })
+
+        SuccessResponse({ res, data: { url } })
+    })
+
     app.get("/check-health", authentication, (req, res) => {
         return SuccessResponse({ res, message: 'health ok', status: 200, })
 

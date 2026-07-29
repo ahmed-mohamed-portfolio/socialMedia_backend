@@ -55,6 +55,13 @@ const bootstrap = async () => {
         }
         return await s3WriteStream(Body, res);
     });
+    app.get('/pre-signed/*path', async (req, res) => {
+        const { download, fileName } = req.query;
+        const { path } = req.params;
+        const Key = path.join('/');
+        const url = await s3_service_1.s3Service.createPreSignedFetchLink({ Key, download, fileName });
+        (0, success_response_1.SuccessResponse)({ res, data: { url } });
+    });
     app.get("/check-health", auth_middleware_1.authentication, (req, res) => {
         return (0, success_response_1.SuccessResponse)({ res, message: 'health ok', status: 200, });
     });
