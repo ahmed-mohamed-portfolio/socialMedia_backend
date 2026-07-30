@@ -106,6 +106,14 @@ class S3Service {
         const url = await (0, s3_request_presigner_1.getSignedUrl)(this.client, command, { expiresIn });
         return url;
     }
+    async deleteAsset({ Bucket = config_1.AWS_BUCKET_NAME, Key, }) {
+        const command = new client_s3_1.DeleteObjectCommand({
+            Bucket,
+            Key,
+        });
+        return await this.client.send(command);
+    }
+    ;
 }
 exports.S3Service = S3Service;
 exports.s3Service = new S3Service();

@@ -271,10 +271,10 @@ class authService {
 
         const user: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
         console.log("user", user);
-
         if (!user) {
             throw new NotFoundException("user NOt Found")
         }
+        const oldPic = user.profilePic
 
         console.log("file", file);
 
@@ -283,6 +283,10 @@ class authService {
         console.log("{ Key }", { Key });
         user.profilePic = Key
         await user.save()
+
+        if (oldPic) {
+            this.s3.deleteAsset({ Key: oldPic })
+        }
         return user.toJSON()
     }
 
@@ -295,6 +299,7 @@ class authService {
             throw new NotFoundException("user NOt Found")
         }
 
+        const oldPic = user.profilePic
 
         const { url, key } = await this.s3.createPreSignedUploadLink({ Originalname, ContentType, path: `Users/${user.id.toString()}/Profile` })
 
@@ -302,6 +307,11 @@ class authService {
         console.log("{ url }", { url });
         user.profilePic = key
         await user.save()
+
+        if (oldPic) {
+            this.s3.deleteAsset({ Key: oldPic })
+        }
+
         return { url, user }
     }
 

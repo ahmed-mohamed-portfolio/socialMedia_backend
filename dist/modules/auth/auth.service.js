@@ -200,11 +200,15 @@ class authService {
         if (!user) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }
+        const oldPic = user.profilePic;
         console.log("file", file);
         const { Key } = await this.s3.uploadLargeAsset({ file, path: `Users/${user.id.toString()}/Profile`, StorageApproach: multer_enum_1.StorageApproachEnum.DISK, partSize: 5 });
         console.log("{ Key }", { Key });
         user.profilePic = Key;
         await user.save();
+        if (oldPic) {
+            this.s3.deleteAsset({ Key: oldPic });
+        }
         return user.toJSON();
     }
     async profileImageByPreSignedLink({ Originalname, ContentType }, userId) {
@@ -213,11 +217,15 @@ class authService {
         if (!user) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }
+        const oldPic = user.profilePic;
         const { url, key } = await this.s3.createPreSignedUploadLink({ Originalname, ContentType, path: `Users/${user.id.toString()}/Profile` });
         console.log("{ Key }", { key });
         console.log("{ url }", { url });
         user.profilePic = key;
         await user.save();
+        if (oldPic) {
+            this.s3.deleteAsset({ Key: oldPic });
+        }
         return { url, user };
     }
     async profileCoverImages(files, userId) {

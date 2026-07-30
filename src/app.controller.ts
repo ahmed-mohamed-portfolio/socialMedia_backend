@@ -36,6 +36,7 @@ export const bootstrap = async (): Promise<void> => {
     await DBconnection()
 
 
+
     app.get("/get-cookie", (req: Request, res: Response) => {
 
         if (req.cookies.accessToken) {
@@ -68,7 +69,6 @@ export const bootstrap = async (): Promise<void> => {
         return await s3WriteStream(Body as NodeJS.ReadableStream, res)
 
     })
-
 
     app.get('/pre-signed/*path', async (req: Request, res: Response) => {
         const { download, fileName } = req.query as { download: string, fileName: string }
