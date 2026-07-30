@@ -150,4 +150,8 @@ router.patch('/profile-cover-images', auth_middleware_1.authentication, (0, mult
     }
     (0, success_response_1.SuccessResponse)({ res, data: userData });
 });
+router.delete("/delete-profile", auth_middleware_1.authentication, async (req, res) => {
+    const data = await auth_service_1.default.deleteProfile(req.userId);
+    return (0, success_response_1.SuccessResponse)({ res, data });
+});
 exports.default = router;

@@ -247,5 +247,20 @@ class authService {
         }
         return user.toJSON();
     }
+    async deleteProfile(userId) {
+        const user = await this.userRepository.findById(userId, '-password');
+        console.log("user", user);
+        if (!user) {
+            throw new application_exceptions_1.NotFoundException("user NOt Found");
+        }
+        const account = await this.userRepository.deleteOne({ email: user.email });
+        if (!account.deletedCount) {
+            throw new application_exceptions_1.NotFoundException("Invalid account");
+        }
+        await this.s3.deleteFolderByPrefix({
+            prefix: `Users/${user._id.toString()}`,
+        });
+        return account;
+    }
 }
 exports.default = new authService();

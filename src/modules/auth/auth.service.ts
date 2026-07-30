@@ -341,6 +341,30 @@ class authService {
 
         return user.toJSON()
     }
+
+    async deleteProfile(userId: string) {
+
+        const user: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
+        console.log("user", user);
+
+        if (!user) {
+            throw new NotFoundException("user NOt Found")
+        }
+
+        const account = await this.userRepository.deleteOne(
+            { email: user.email },
+        );
+
+        if (!account.deletedCount) {
+            throw new NotFoundException("Invalid account");
+        }
+
+        await this.s3.deleteFolderByPrefix({
+            prefix: `Users/${user._id.toString()}`,
+        });
+
+        return account;
+    }
 }
 
 export default new authService()

@@ -124,6 +124,20 @@ class S3Service {
         return await this.client.send(command);
     }
     ;
+    async listFolderDir({ Bucket = config_1.AWS_BUCKET_NAME, prefix }) {
+        const command = new client_s3_1.ListObjectsV2Command({
+            Bucket,
+            Prefix: `${config_1.APPLICATION_NAME}/${prefix}`,
+        });
+        return await this.client.send(command);
+    }
+    async deleteFolderByPrefix({ Bucket = config_1.AWS_BUCKET_NAME, prefix, }) {
+        const result = await this.listFolderDir({ Bucket, prefix });
+        const Keys = result.Contents?.map((ele) => {
+            return { Key: ele.Key };
+        });
+        return await this.deleteAssets({ Bucket, Keys });
+    }
 }
 exports.S3Service = S3Service;
 exports.s3Service = new S3Service();

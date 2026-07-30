@@ -1,5 +1,5 @@
 import { Router } from "express"
-import type { Request, Response } from "express"
+import type { NextFunction, Request, Response } from "express"
 import authService from "./auth.service"
 import { SuccessResponse } from "../../common/exceptions/success.response"
 import { signinSchema, signupSchema, verifySchema } from "./auth.validation"
@@ -211,4 +211,11 @@ router.patch('/profile-cover-images', authentication, cloudeFileUpload({ Storage
 
     SuccessResponse({ res, data: userData })
 })
+
+router.delete("/delete-profile", authentication, async (req: Request, res: Response) => {
+    const data = await authService.deleteProfile(req.userId);
+
+    return SuccessResponse({ res, data });
+},
+);
 export default router
