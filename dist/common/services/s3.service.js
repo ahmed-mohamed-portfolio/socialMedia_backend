@@ -113,6 +113,16 @@ class S3Service {
         });
         return await this.client.send(command);
     }
+    async deleteAssets({ Bucket = config_1.AWS_BUCKET_NAME, Keys, }) {
+        const command = new client_s3_1.DeleteObjectsCommand({
+            Bucket,
+            Delete: {
+                Objects: Keys,
+                Quiet: false
+            }
+        });
+        return await this.client.send(command);
+    }
     ;
 }
 exports.S3Service = S3Service;

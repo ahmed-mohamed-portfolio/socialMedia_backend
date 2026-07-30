@@ -1,6 +1,6 @@
 import { UploadApproachEnum } from './../enums/multer.enum';
 import { randomUUID } from 'node:crypto';
-import { CompleteMultipartUploadCommandOutput, DeleteObjectCommand, DeleteObjectCommandOutput, GetObjectCommand, GetObjectCommandOutput, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { CompleteMultipartUploadCommandOutput, DeleteObjectCommand, DeleteObjectCommandOutput, DeleteObjectsCommand, DeleteObjectsCommandOutput, GetObjectCommand, GetObjectCommandOutput, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { APPLICATION_NAME, AWS_ACCESS_KEY_ID, AWS_BUCKET_NAME, AWS_EXPIRES_IN, AWS_REGION, AWS_SECRET_ACCESS_KEY } from "../../config";
 import { BadRequestException } from '../exceptions/application.exceptions';
 import { StorageApproachEnum } from '../enums';
@@ -233,6 +233,24 @@ export class S3Service {
         const command = new DeleteObjectCommand({
             Bucket,
             Key,
+        });
+        return await this.client.send(command);
+    }
+
+
+    async deleteAssets({
+        Bucket = AWS_BUCKET_NAME,
+        Keys,
+    }: {
+        Bucket?: string;
+        Keys: { Key: string }[];
+    }): Promise<DeleteObjectsCommandOutput> {
+        const command = new DeleteObjectsCommand({
+            Bucket,
+            Delete: {
+                Objects: Keys,
+                Quiet: false
+            }
         });
         return await this.client.send(command);
     };

@@ -324,6 +324,7 @@ class authService {
             throw new NotFoundException("user NOt Found")
         }
 
+        const oldUrls = user.profileCoverPic
         console.log("files", files);
 
         const urls = await this.s3.uploadAssets({ files, path: `Users/${user.id.toString()}/Profile/cover`, StorageApproach: StorageApproachEnum.DISK, UploadApproach: UploadApproachEnum.LARGE })
@@ -331,6 +332,13 @@ class authService {
         console.log("urls", urls);
         user.profileCoverPic = urls
         await user.save()
+
+        if (oldUrls?.length) {
+            this.s3.deleteAssets({
+                Keys: oldUrls.map(fileName => ({ Key: fileName }))
+            })
+        }
+
         return user.toJSON()
     }
 }
