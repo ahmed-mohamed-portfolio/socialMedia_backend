@@ -66,7 +66,7 @@ export const bootstrap = async (): Promise<void> => {
             res.setHeader("Content-Disposition", `attachment; filename="${fileName || Key.split("/").pop()}"`); // only apply it for  download
         }
 
-        return await s3WriteStream(Body as NodeJS.ReadableStream, res)
+        return await s3WriteStream(Body as unknown as NodeJS.ReadableStream, res)
 
     })
 
