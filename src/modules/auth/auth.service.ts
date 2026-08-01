@@ -299,18 +299,16 @@ class authService {
             throw new NotFoundException("user NOt Found")
         }
 
-        const oldPic = user.profilePic
+        // const oldPic = user.profilePic
 
         const { url, key } = await this.s3.createPreSignedUploadLink({ Originalname, ContentType, path: `Users/${user.id.toString()}/Profile` })
 
-        console.log("{ Key }", { key });
-        console.log("{ url }", { url });
-        user.profilePic = key
-        await user.save()
+        // user.profilePic = key
+        // await user.save()
 
-        if (oldPic) {
-            this.s3.deleteAsset({ Key: oldPic })
-        }
+        // if (oldPic) {
+        //     this.s3.deleteAsset({ Key: oldPic })
+        // }
 
         return { url, user }
     }
