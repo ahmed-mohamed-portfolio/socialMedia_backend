@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifySchema = exports.signinSchema = exports.signupSchema = void 0;
+exports.changePasswordSchema = exports.verifySchema = exports.signinSchema = exports.signupSchema = void 0;
 const zod_1 = require("zod");
 const enums_1 = require("../../common/enums");
 exports.signupSchema = {
@@ -32,5 +32,11 @@ exports.verifySchema = {
     body: zod_1.z.strictObject({
         email: zod_1.z.email({ error: "email not right" }),
         code: zod_1.z.string().min(4).max(4)
+    })
+};
+exports.changePasswordSchema = {
+    body: zod_1.z.strictObject({
+        password: zod_1.z.string().min(5).max(20),
+        newPassword: zod_1.z.string().min(5).max(20)
     })
 };

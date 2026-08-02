@@ -2,7 +2,7 @@ import { Router } from "express"
 import type { NextFunction, Request, Response } from "express"
 import authService from "./auth.service"
 import { SuccessResponse } from "../../common/exceptions/success.response"
-import { signinSchema, signupSchema, verifySchema } from "./auth.validation"
+import { changePasswordSchema, signinSchema, signupSchema, verifySchema } from "./auth.validation"
 import { validation } from "../../middleware/validation.middleware"
 import { BadRequestException, ConflictException } from "../../common/exceptions/application.exceptions"
 import { authentication } from "../../middleware/auth.middleware"
@@ -216,6 +216,14 @@ router.delete("/delete-profile", authentication, async (req: Request, res: Respo
     const data = await authService.deleteProfile(req.userId);
 
     return SuccessResponse({ res, data });
-},
-);
+})
+
+router.patch("/change-password", validation(changePasswordSchema), authentication, async (req: Request, res: Response) => {
+
+    const data = await authService.changePassword(req.body, req.userId)
+
+    return SuccessResponse({ res, message: 'success', data });
+
+})
+
 export default router

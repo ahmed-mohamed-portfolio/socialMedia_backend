@@ -154,4 +154,8 @@ router.delete("/delete-profile", auth_middleware_1.authentication, async (req, r
     const data = await auth_service_1.default.deleteProfile(req.userId);
     return (0, success_response_1.SuccessResponse)({ res, data });
 });
+router.patch("/change-password", (0, validation_middleware_1.validation)(auth_validation_1.changePasswordSchema), auth_middleware_1.authentication, async (req, res) => {
+    const data = await auth_service_1.default.changePassword(req.body, req.userId);
+    return (0, success_response_1.SuccessResponse)({ res, message: 'success', data });
+});
 exports.default = router;

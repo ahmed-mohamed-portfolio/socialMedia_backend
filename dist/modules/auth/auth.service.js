@@ -58,7 +58,7 @@ class authService {
                 return { existUser, accessToken, refreshToken };
             }
         }
-        throw new application_exceptions_1.NotFoundException("user not found");
+        throw new application_exceptions_2.BadRequestException("wrong email or password");
     }
     async signup(data) {
         const existuser = await this.userRepository.findOne({ email: data.email });
@@ -273,6 +273,24 @@ class authService {
             prefix: `Users/${user._id.toString()}`,
         });
         return account;
+    }
+    async changePassword(data, userId) {
+        let { password, newPassword } = data;
+        //get user by id
+        const existUser = await this.userRepository.findById(userId);
+        if (!existUser) {
+            throw new application_exceptions_1.NotFoundException("user not found");
+        }
+        //compare old pass
+        let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password });
+        if (!isMatched) {
+            throw new application_exceptions_2.BadRequestException("wrong password");
+        }
+        //hash new pass
+        newPassword = await this.securityService.generateHash({ planText: newPassword });
+        //set new pass in database 
+        const user = await this.userRepository.updateOne({ email: existUser.email }, { password: newPassword });
+        return user;
     }
 }
 exports.default = new authService();
