@@ -1,5 +1,4 @@
 import { HydratedDocument, Model, PopulateOptions } from "mongoose"
-import { IUser } from "../../common/interfaces"
 
 type Select = string | Record<string, 0 | 1>
 
@@ -14,7 +13,7 @@ type Options = {
 }
 
 export class DatabaseRepository<TRawDocs> {
-    constructor(private model: Model<TRawDocs>) {}
+    constructor(private model: Model<TRawDocs>) { }
 
     private applyQueryOptions(query: any, select?: Select, options: Options = {}) {
         if (select) {
