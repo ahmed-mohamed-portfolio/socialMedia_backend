@@ -17,6 +17,7 @@ const env_service_1 = require("./../../config/env.service");
 const node_crypto_1 = __importDefault(require("node:crypto"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const s3_service_1 = require("../../common/services/s3.service");
+const notification_service_1 = require("../../common/services/notification.service");
 class authService {
     userModel;
     userRepository;
@@ -31,7 +32,7 @@ class authService {
         this.s3 = s3_service_1.s3Service;
     }
     async login(data, issuer) {
-        let { email, password } = data;
+        let { email, password, FCM } = data;
         let existUser = await this.userRepository.findOne({ email });
         // console.log("existUser", existUser)
         // if (!existUser.confirmEmail) {
@@ -40,6 +41,19 @@ class authService {
         if (existUser) {
             let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password });
             if (isMatched) {
+                if (FCM) {
+                    await redis_service_1.redisService.addFCM(existUser._id, FCM);
+                    const tokens = await redis_service_1.redisService.getFCMs(existUser._id);
+                    if (tokens?.length) {
+                        await notification_service_1.notificationService.sendNotificationToTokens({
+                            tokens,
+                            data: {
+                                title: "new login",
+                                body: `new login at ${new Date()}`
+                            }
+                        });
+                    }
+                }
                 let { accessToken, refreshToken } = this.tokenService.generateToken(existUser, issuer);
                 return { existUser, accessToken, refreshToken };
             }

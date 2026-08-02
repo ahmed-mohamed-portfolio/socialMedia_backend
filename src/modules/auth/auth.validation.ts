@@ -26,7 +26,8 @@ export const signupSchema = {
 export const signinSchema = {
     body: z.strictObject({
         email: z.email({ error: "email not right" }),
-        password: z.string().min(5).max(20)
+        password: z.string().min(5).max(20),
+        FCM: z.string().optional()
     })
 }
 

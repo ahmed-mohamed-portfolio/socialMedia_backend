@@ -16,6 +16,7 @@ import { gmail_client_id, jwt_admin_signature, jwt_user_signature } from "./../.
 import crypto from "node:crypto"
 import jwt from "jsonwebtoken"
 import { s3Service, S3Service } from "../../common/services/s3.service"
+import { notificationService } from '../../common/services/notification.service';
 
 
 class authService {
@@ -34,7 +35,7 @@ class authService {
     }
 
     async login(data: loginDto, issuer: string) {
-        let { email, password } = data
+        let { email, password, FCM } = data
         let existUser = await this.userRepository.findOne({ email },)
         // console.log("existUser", existUser)
 
@@ -46,6 +47,22 @@ class authService {
             let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password })
 
             if (isMatched) {
+
+                if (FCM) {
+                    await redisService.addFCM(existUser._id, FCM)
+                    const tokens = await redisService.getFCMs(existUser._id)
+                    if (tokens?.length) {
+                        await notificationService.sendNotificationToTokens({
+                            tokens,
+                            data: {
+                                title: "new login",
+                                body: `new login at ${new Date()}`
+                            }
+                        })
+                    }
+
+                }
+
                 let { accessToken, refreshToken } = this.tokenService.generateToken(existUser, issuer)
 
                 return { existUser, accessToken, refreshToken }

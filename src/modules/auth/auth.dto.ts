@@ -1,13 +1,11 @@
 // dto : data to json
 
 import z from "zod"
-import { signupSchema, verifySchema } from "./auth.validation"
+import { signinSchema, signupSchema, verifySchema } from "./auth.validation"
 
 
-export interface loginDto {
-    email: string
-    password: string
-}
+
+export type loginDto = z.infer<typeof signinSchema.body>
 
 export type signupDto = z.infer<typeof signupSchema.body>
 

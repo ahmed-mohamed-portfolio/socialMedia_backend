@@ -12,6 +12,7 @@ import { authentication } from "./middleware/auth.middleware"
 import { s3Service } from "./common/services/s3.service"
 import { pipeline } from 'node:stream'
 import { promisify } from "node:util"
+import { notificationService } from "./common/services/notification.service"
 
 const s3WriteStream = promisify(pipeline)
 
@@ -82,9 +83,23 @@ export const bootstrap = async (): Promise<void> => {
         SuccessResponse({ res, data: { url } })
     })
 
-    app.get("/check-health", authentication, (req, res) => {
+    app.get("/check-health", authentication, (req: Request, res: Response) => {
         return SuccessResponse({ res, message: 'health ok', status: 200, })
 
+    })
+
+    app.post("/send-notification", async (req: Request, res: Response) => {
+
+        await notificationService.sendNotificationToToken({
+            token: req.body.token,
+            data: {
+                title: "Test Notification",
+                body: "you have new test message"
+            }
+        })
+
+
+        SuccessResponse({ res, message: "notification done" })
     })
 
 

@@ -122,5 +122,23 @@ class RedisService {
             throw new application_exceptions_1.ServiceUnavailableException("Fail in redis delete operation", error);
         }
     };
+    FCM_key(userId) {
+        return `user:FCM:${userId.toString()}`;
+    }
+    async addFCM(userId, FCMToken) {
+        return await this.client.sAdd(this.FCM_key(userId), FCMToken);
+    }
+    async removeFCM(userId, FCMToken) {
+        return await this.client.sRem(this.FCM_key(userId), FCMToken);
+    }
+    async getFCMs(userId) {
+        return await this.client.sMembers(this.FCM_key(userId));
+    }
+    async hasFCMs(userId) {
+        return await this.client.sCard(this.FCM_key(userId));
+    }
+    async removeFCMUser(userId) {
+        return await this.client.del(this.FCM_key(userId));
+    }
 }
 exports.redisService = new RedisService();

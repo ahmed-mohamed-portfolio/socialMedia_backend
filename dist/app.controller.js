@@ -17,6 +17,7 @@ const auth_middleware_1 = require("./middleware/auth.middleware");
 const s3_service_1 = require("./common/services/s3.service");
 const node_stream_1 = require("node:stream");
 const node_util_1 = require("node:util");
+const notification_service_1 = require("./common/services/notification.service");
 const s3WriteStream = (0, node_util_1.promisify)(node_stream_1.pipeline);
 const bootstrap = async () => {
     const app = (0, express_1.default)();
@@ -64,6 +65,16 @@ const bootstrap = async () => {
     });
     app.get("/check-health", auth_middleware_1.authentication, (req, res) => {
         return (0, success_response_1.SuccessResponse)({ res, message: 'health ok', status: 200, });
+    });
+    app.post("/send-notification", async (req, res) => {
+        await notification_service_1.notificationService.sendNotificationToToken({
+            token: req.body.token,
+            data: {
+                title: "Test Notification",
+                body: "you have new test message"
+            }
+        });
+        (0, success_response_1.SuccessResponse)({ res, message: "notification done" });
     });
     app.use(error_middleware_1.globalErrorHandler);
     app.listen(env_service_1.PORT, () => {

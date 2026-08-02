@@ -24,7 +24,8 @@ exports.signupSchema = {
 exports.signinSchema = {
     body: zod_1.z.strictObject({
         email: zod_1.z.email({ error: "email not right" }),
-        password: zod_1.z.string().min(5).max(20)
+        password: zod_1.z.string().min(5).max(20),
+        FCM: zod_1.z.string().optional()
     })
 };
 exports.verifySchema = {

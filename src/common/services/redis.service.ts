@@ -1,6 +1,7 @@
 import { createClient, RedisClientType } from "redis"
 import { redis_uri } from "../../config"
 import { NotFoundException, ServiceUnavailableException } from "../exceptions/application.exceptions"
+import { ObjectId } from "mongoose"
 
 class RedisService {
     private client: RedisClientType
@@ -128,6 +129,35 @@ class RedisService {
             throw new ServiceUnavailableException("Fail in redis delete operation", error)
         }
     }
+
+
+
+
+
+    FCM_key(userId: ObjectId | string) {
+        return `user:FCM:${userId.toString()}`;
+    }
+    async addFCM(userId: ObjectId | string, FCMToken: string) {
+        return await this.client.sAdd(this.FCM_key(userId), FCMToken);
+    }
+
+    async removeFCM(userId: ObjectId | string, FCMToken: string) {
+        return await this.client.sRem(this.FCM_key(userId), FCMToken);
+    }
+
+    async getFCMs(userId: ObjectId | string) {
+        return await this.client.sMembers(this.FCM_key(userId));
+    }
+
+    async hasFCMs(userId: ObjectId | string) {
+        return await this.client.sCard(this.FCM_key(userId));
+    }
+
+    async removeFCMUser(userId: ObjectId | string) {
+        return await this.client.del(this.FCM_key(userId));
+    }
+
+
 }
 
 export const redisService = new RedisService()
