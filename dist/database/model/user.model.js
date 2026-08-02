@@ -24,6 +24,7 @@ const userSchema = new Schema({
     role: { type: Number, default: 1 /* RoleEnum.user */ },
     provider: { type: Number, default: 0 /* ProviderEnum.system */ },
     confirmEmail: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
     credentialsUpdatedAt: { type: Date, default: Date.now }
 });
 userSchema
