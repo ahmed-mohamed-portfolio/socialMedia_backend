@@ -1,12 +1,14 @@
-import mongoose from "mongoose"
+import { BadRequestException } from './../../common/exceptions/application.exceptions';
+import mongoose, { models } from "mongoose"
 import { IUser } from "../../common/interfaces"
 import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enums"
-import { type } from "node:os"
+
 const { Schema } = mongoose
 
 const userSchema = new Schema<IUser>({
     firstName: { type: String },
     lastName: { type: String },
+    slug: { type: String },
     email: { type: String, required: true, unique: true },
     phone: { type: String },
     profilePic: { type: String },
@@ -32,11 +34,27 @@ userSchema
         let [firstName, lastName] = value.split(" ")
         this.firstName = firstName
         this.lastName = lastName
+
+        this.slug = value.replaceAll(/\s+/g, "-")
     })
     .get(function () {
         return `${this.firstName} ${this.lastName}`
     })
 
-const userModel = mongoose.model<IUser>("User", userSchema)
+
+
+userSchema.pre("validate", function () {
+    if (this.password && this.provider == ProviderEnum.google) {
+        throw new BadRequestException("google account cant hold password")
+    }
+})
+
+userSchema.pre("validate", function () {
+    if (!this.slug || this.slug.includes(" ")) {
+        throw new BadRequestException("invalid slug format")
+    }
+})
+
+const userModel = models.User || mongoose.model<IUser>("User", userSchema)
 
 export default userModel

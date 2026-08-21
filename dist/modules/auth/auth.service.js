@@ -281,15 +281,20 @@ class authService {
         if (!existUser) {
             throw new application_exceptions_1.NotFoundException("user not found");
         }
-        //compare old pass
-        let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password });
-        if (!isMatched) {
-            throw new application_exceptions_2.BadRequestException("wrong password");
+        if (existUser.provider == 0 /* ProviderEnum.system */) {
+            if (!password) {
+                throw new application_exceptions_2.BadRequestException("old password is required");
+            }
+            //compare old pass
+            let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password });
+            if (!isMatched) {
+                throw new application_exceptions_2.BadRequestException("wrong password");
+            }
         }
         //hash new pass
         newPassword = await this.securityService.generateHash({ planText: newPassword });
         //set new pass in database 
-        const user = await this.userRepository.updateOne({ email: existUser.email }, { password: newPassword });
+        const user = await this.userRepository.updateOne({ email: existUser.email }, { password: newPassword, provider: 0 /* ProviderEnum.system */ });
         return user;
     }
 }

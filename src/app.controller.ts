@@ -8,11 +8,12 @@ import DBconnection from "./database/connection"
 import { redisService } from "./common/services/redis.service"
 import cookieParser from "cookie-parser"
 import { SuccessResponse } from "./common/exceptions/success.response"
-import { authentication } from "./middleware/auth.middleware"
 import { s3Service } from "./common/services/s3.service"
 import { pipeline } from 'node:stream'
 import { promisify } from "node:util"
 import { notificationService } from "./common/services/notification.service"
+import userModel from "./database/model/user.model"
+
 
 const s3WriteStream = promisify(pipeline)
 
@@ -35,6 +36,14 @@ export const bootstrap = async (): Promise<void> => {
 
     await redisService.connect()
     await DBconnection()
+
+
+
+    const x = await new userModel({
+        userName: "ahme mojhamde",
+        password: "sssssss",
+        email: `${Date.now()}@gmail.com`
+    }).save()
 
 
 
@@ -83,7 +92,7 @@ export const bootstrap = async (): Promise<void> => {
         SuccessResponse({ res, data: { url } })
     })
 
-    app.get("/check-health", authentication, (req: Request, res: Response) => {
+    app.get("/check-health", (req: Request, res: Response) => {
         return SuccessResponse({ res, message: 'health ok', status: 200, })
 
     })

@@ -13,11 +13,11 @@ const connection_1 = __importDefault(require("./database/connection"));
 const redis_service_1 = require("./common/services/redis.service");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const success_response_1 = require("./common/exceptions/success.response");
-const auth_middleware_1 = require("./middleware/auth.middleware");
 const s3_service_1 = require("./common/services/s3.service");
 const node_stream_1 = require("node:stream");
 const node_util_1 = require("node:util");
 const notification_service_1 = require("./common/services/notification.service");
+const user_model_1 = __importDefault(require("./database/model/user.model"));
 const s3WriteStream = (0, node_util_1.promisify)(node_stream_1.pipeline);
 const bootstrap = async () => {
     const app = (0, express_1.default)();
@@ -34,6 +34,11 @@ const bootstrap = async () => {
     app.use("/users", modules_1.authRouter);
     await redis_service_1.redisService.connect();
     await (0, connection_1.default)();
+    const x = await new user_model_1.default({
+        userName: "ahme mojhamde",
+        password: "sssssss",
+        email: `${Date.now()}@gmail.com`
+    }).save();
     app.get("/get-cookie", (req, res) => {
         if (req.cookies.accessToken) {
             return res.json({ auth: true });
@@ -63,7 +68,7 @@ const bootstrap = async () => {
         const url = await s3_service_1.s3Service.createPreSignedFetchLink({ Key, download, fileName });
         (0, success_response_1.SuccessResponse)({ res, data: { url } });
     });
-    app.get("/check-health", auth_middleware_1.authentication, (req, res) => {
+    app.get("/check-health", (req, res) => {
         return (0, success_response_1.SuccessResponse)({ res, message: 'health ok', status: 200, });
     });
     app.post("/send-notification", async (req, res) => {

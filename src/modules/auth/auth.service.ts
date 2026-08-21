@@ -383,22 +383,38 @@ class authService {
 
     async changePassword(data: changePasswordDto, userId: string) {
         let { password, newPassword } = data
+
+
         //get user by id
         const existUser = await this.userRepository.findById(userId)
         if (!existUser) {
             throw new NotFoundException("user not found")
         }
-        //compare old pass
-        let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password })
-        if (!isMatched) {
-            throw new BadRequestException("wrong password")
+
+
+        if (existUser.provider == ProviderEnum.system) {
+
+            if (!password) {
+                throw new BadRequestException("old password is required")
+            }
+
+            //compare old pass
+            let isMatched = await this.securityService.compareHash({ planText: password, cypherText: existUser.password })
+            if (!isMatched) {
+                throw new BadRequestException("wrong password")
+            }
+
         }
+
+
         //hash new pass
         newPassword = await this.securityService.generateHash({ planText: newPassword })
 
+
         //set new pass in database 
-        const user = await this.userRepository.updateOne({ email: existUser.email }, { password: newPassword })
+        const user = await this.userRepository.updateOne({ email: existUser.email }, { password: newPassword, provider: ProviderEnum.system })
         return user
+
 
     }
 }

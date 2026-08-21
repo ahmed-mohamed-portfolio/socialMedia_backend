@@ -36,7 +36,7 @@ exports.verifySchema = {
 };
 exports.changePasswordSchema = {
     body: zod_1.z.strictObject({
-        password: zod_1.z.string().min(5).max(20),
+        password: zod_1.z.string().min(5).max(20).nullable(),
         newPassword: zod_1.z.string().min(5).max(20)
     })
 };

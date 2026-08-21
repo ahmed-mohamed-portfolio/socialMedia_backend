@@ -38,11 +38,9 @@ export const verifySchema = {
     })
 }
 
-
-
 export const changePasswordSchema = {
     body: z.strictObject({
-        password: z.string().min(5).max(20),
+        password: z.string().min(5).max(20).nullable(),
         newPassword: z.string().min(5).max(20)
     })
 }
