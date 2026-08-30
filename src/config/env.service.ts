@@ -22,6 +22,8 @@ let AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID as string
 let AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY as string
 let AWS_EXPIRES_IN = process.env.AWS_EXPIRES_IN as string
 let APPLICATION_NAME = process.env.APPLICATION_NAME as string
+let ENC_IV_LENGTH = parseInt(process.env.ENC_IV_LENGTH ?? '16')
+let ENC_KEY = process.env.ENC_KEY as string
 export {
     PORT,
     MONGODB_URL,
@@ -41,5 +43,7 @@ export {
     AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY,
     AWS_EXPIRES_IN,
-    APPLICATION_NAME
+    APPLICATION_NAME,
+    ENC_IV_LENGTH,
+    ENC_KEY
 }

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.APPLICATION_NAME = exports.AWS_EXPIRES_IN = exports.AWS_SECRET_ACCESS_KEY = exports.AWS_ACCESS_KEY_ID = exports.AWS_BUCKET_NAME = exports.AWS_REGION = exports.nodeMailer_app_email = exports.nodeMailer_app_password = exports.redis_uri = exports.gmail_client_id = exports.jwt_user_refresh_signature = exports.jwt_admin_refresh_signature = exports.jwt_user_signature = exports.jwt_admin_signature = exports.SALT = exports.MONGODB_URL = exports.PORT = void 0;
+exports.ENC_KEY = exports.ENC_IV_LENGTH = exports.APPLICATION_NAME = exports.AWS_EXPIRES_IN = exports.AWS_SECRET_ACCESS_KEY = exports.AWS_ACCESS_KEY_ID = exports.AWS_BUCKET_NAME = exports.AWS_REGION = exports.nodeMailer_app_email = exports.nodeMailer_app_password = exports.redis_uri = exports.gmail_client_id = exports.jwt_user_refresh_signature = exports.jwt_admin_refresh_signature = exports.jwt_user_signature = exports.jwt_admin_signature = exports.SALT = exports.MONGODB_URL = exports.PORT = void 0;
 const dotenv_1 = require("dotenv");
 const path_1 = __importDefault(require("path"));
 (0, dotenv_1.config)({ path: path_1.default.resolve(`./.env.${process.env.NODE_ENV}`) });
@@ -43,3 +43,7 @@ let AWS_EXPIRES_IN = process.env.AWS_EXPIRES_IN;
 exports.AWS_EXPIRES_IN = AWS_EXPIRES_IN;
 let APPLICATION_NAME = process.env.APPLICATION_NAME;
 exports.APPLICATION_NAME = APPLICATION_NAME;
+let ENC_IV_LENGTH = parseInt(process.env.ENC_IV_LENGTH ?? '16');
+exports.ENC_IV_LENGTH = ENC_IV_LENGTH;
+let ENC_KEY = process.env.ENC_KEY;
+exports.ENC_KEY = ENC_KEY;

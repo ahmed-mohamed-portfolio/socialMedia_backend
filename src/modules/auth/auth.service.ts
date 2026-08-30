@@ -65,6 +65,11 @@ class authService {
 
                 let { accessToken, refreshToken } = this.tokenService.generateToken(existUser, issuer)
 
+
+                if (existUser.phone) {
+                    existUser.phone = await this.securityService.generateDecryption(existUser.phone)
+                }
+
                 return { existUser, accessToken, refreshToken }
             }
         }
@@ -85,7 +90,7 @@ class authService {
             return user.toJSON()
         }
 
-        data.password = await this.securityService.generateHash({ planText: data.password })
+        // data.password = await this.securityService.generateHash({ planText: data.password })
 
         let result: HydratedDocument<IUser> = await this.userRepository.create(data)
 
@@ -93,7 +98,7 @@ class authService {
             throw new BadRequestException("user not created")
         }
 
-        verifyEmailEvent.emit("verifyEmail", { userId: result._id, email: data.email })
+        // verifyEmailEvent.emit("verifyEmail", { userId: result._id, email: data.email })
 
         return result.toJSON()
     }
@@ -278,6 +283,10 @@ class authService {
 
         if (!userInfo) {
             throw new NotFoundException("user NOt Found")
+        }
+
+        if (userInfo.phone) {
+            userInfo.phone = await this.securityService.generateDecryption(userInfo.phone)
         }
 
         return userInfo

@@ -55,6 +55,9 @@ class authService {
                     }
                 }
                 let { accessToken, refreshToken } = this.tokenService.generateToken(existUser, issuer);
+                if (existUser.phone) {
+                    existUser.phone = await this.securityService.generateDecryption(existUser.phone);
+                }
                 return { existUser, accessToken, refreshToken };
             }
         }
@@ -70,12 +73,12 @@ class authService {
             email_events_1.verifyEmailEvent.emit("verifyEmail", { userId: user._id, email: data.email });
             return user.toJSON();
         }
-        data.password = await this.securityService.generateHash({ planText: data.password });
+        // data.password = await this.securityService.generateHash({ planText: data.password })
         let result = await this.userRepository.create(data);
         if (!result) {
             throw new application_exceptions_2.BadRequestException("user not created");
         }
-        email_events_1.verifyEmailEvent.emit("verifyEmail", { userId: result._id, email: data.email });
+        // verifyEmailEvent.emit("verifyEmail", { userId: result._id, email: data.email })
         return result.toJSON();
     }
     async verifyEmail(data) {
@@ -205,6 +208,9 @@ class authService {
         console.log(userInfo);
         if (!userInfo) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
+        }
+        if (userInfo.phone) {
+            userInfo.phone = await this.securityService.generateDecryption(userInfo.phone);
         }
         return userInfo;
     }

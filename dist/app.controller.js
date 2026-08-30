@@ -17,7 +17,6 @@ const s3_service_1 = require("./common/services/s3.service");
 const node_stream_1 = require("node:stream");
 const node_util_1 = require("node:util");
 const notification_service_1 = require("./common/services/notification.service");
-const user_model_1 = __importDefault(require("./database/model/user.model"));
 const s3WriteStream = (0, node_util_1.promisify)(node_stream_1.pipeline);
 const bootstrap = async () => {
     const app = (0, express_1.default)();
@@ -34,11 +33,6 @@ const bootstrap = async () => {
     app.use("/users", modules_1.authRouter);
     await redis_service_1.redisService.connect();
     await (0, connection_1.default)();
-    const x = await new user_model_1.default({
-        userName: "ahme mojhamde",
-        password: "sssssss",
-        email: `${Date.now()}@gmail.com`
-    }).save();
     app.get("/get-cookie", (req, res) => {
         if (req.cookies.accessToken) {
             return res.json({ auth: true });

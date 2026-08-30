@@ -56,17 +56,17 @@ class DatabaseRepository {
         return this.applyQueryOptions(query, select, options);
     }
     updateOne(filter = {}, data = {}, options = {}) {
-        return this.model.updateOne(filter, data, options);
+        return this.model.updateOne(filter, { ...data, $inc: { ...data.$inc, __v: 1 } }, options);
     }
     updateMany(filter = {}, data = {}, options = {}) {
-        return this.model.updateMany(filter, data, options);
+        return this.model.updateMany(filter, { ...data, $inc: { ...data.$inc, __v: 1 } }, options);
     }
     findOneAndUpdate(filter = {}, data = {}, select, options = {}) {
-        const query = this.model.findOneAndUpdate(filter, data, options);
+        const query = this.model.findOneAndUpdate(filter, { ...data, $inc: { ...data.$inc, __v: 1 } }, { ...options, new: options.new ?? true });
         return this.applyQueryOptions(query, select, options);
     }
     findByIdAndUpdate(id, data = {}, select, options = {}) {
-        const query = this.model.findByIdAndUpdate(id, data, options);
+        const query = this.model.findByIdAndUpdate(id, { ...data, $inc: { ...data.$inc, __v: 1 } }, { ...options, new: options.new ?? true });
         return this.applyQueryOptions(query, select, options);
     }
     deleteOne(filter = {}, options = {}) {

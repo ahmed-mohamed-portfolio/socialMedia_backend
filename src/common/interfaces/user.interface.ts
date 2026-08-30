@@ -6,7 +6,7 @@ export interface IUser {
     slug: string
     lastName: string
     email: string
-    phone: string
+    phone?: string
     profilePic?: string
     profileCoverPic?: string[]
     password: string
@@ -14,8 +14,8 @@ export interface IUser {
     role?: RoleEnum
     provider?: ProviderEnum
     confirmEmail: boolean
-    createdAt?: Date
-    updatedAt?: Date
+    deletedAt?: Date
+    restoredAt?: Date
     dateOfBirth: Date
     credentialsUpdatedAt: Date
 }

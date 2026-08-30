@@ -1,4 +1,4 @@
-import { HydratedDocument, Model, PopulateOptions } from "mongoose"
+import { HydratedDocument, Model, PopulateOptions, QueryFilter, UpdateQuery } from "mongoose"
 
 type Select = string | Record<string, 0 | 1>
 
@@ -61,17 +61,17 @@ export class DatabaseRepository<TRawDocs> {
         return this.model.insertMany(data, options)
     }
 
-    findOne(filter: Partial<TRawDocs> = {}, select?: Select, options: Options = {}) {
+    findOne(filter: QueryFilter<TRawDocs> = {}, select?: Select, options: Options = {}) {
         const query = this.model.findOne(filter, null, options)
 
         return this.applyQueryOptions(query, select, options)
     }
 
-    findone(filter: Partial<TRawDocs> = {}, select?: Select, populate?: PopulateOptions | PopulateOptions[]) {
+    findone(filter: QueryFilter<TRawDocs> = {}, select?: Select, populate?: PopulateOptions | PopulateOptions[]) {
         return this.findOne(filter, select, { populate })
     }
 
-    find(filter: Partial<TRawDocs> = {}, select?: Select, options: Options = {}) {
+    find(filter: QueryFilter<TRawDocs> = {}, select?: Select, options: Options = {}) {
         const query = this.model.find(filter, null, options)
 
         return this.applyQueryOptions(query, select, options)
@@ -83,35 +83,35 @@ export class DatabaseRepository<TRawDocs> {
         return this.applyQueryOptions(query, select, options)
     }
 
-    updateOne(filter: Partial<TRawDocs> = {}, data: Partial<TRawDocs> = {}, options: Options = {}) {
-        return this.model.updateOne(filter, data, options)
+    updateOne(filter: QueryFilter<TRawDocs> = {}, data: UpdateQuery<TRawDocs> = {}, options: Options = {}) {
+        return this.model.updateOne(filter, { ...data, $inc: { ...data.$inc, __v: 1 } }, options)
     }
 
-    updateMany(filter: Partial<TRawDocs> = {}, data: Partial<TRawDocs> = {}, options: Options = {}) {
-        return this.model.updateMany(filter, data, options)
+    updateMany(filter: QueryFilter<TRawDocs> = {}, data: UpdateQuery<TRawDocs> = {}, options: Options = {}) {
+        return this.model.updateMany(filter, { ...data, $inc: { ...data.$inc, __v: 1 } }, options)
     }
 
-    findOneAndUpdate(filter: Partial<TRawDocs> = {}, data: Partial<TRawDocs> = {}, select?: Select, options: Options = {}) {
-        const query = this.model.findOneAndUpdate(filter, data, options)
+    findOneAndUpdate(filter: QueryFilter<TRawDocs> = {}, data: UpdateQuery<TRawDocs> = {}, select?: Select, options: Options = {}) {
+        const query = this.model.findOneAndUpdate(filter, { ...data, $inc: { ...data.$inc, __v: 1 } }, { ...options, new: options.new ?? true })
 
         return this.applyQueryOptions(query, select, options)
     }
 
-    findByIdAndUpdate(id: string, data: Partial<TRawDocs> = {}, select?: Select, options: Options = {}) {
-        const query = this.model.findByIdAndUpdate(id, data, options)
+    findByIdAndUpdate(id: string, data: UpdateQuery<TRawDocs> = {}, select?: Select, options: Options = {}) {
+        const query = this.model.findByIdAndUpdate(id, { ...data, $inc: { ...data.$inc, __v: 1 } }, { ...options, new: options.new ?? true })
 
         return this.applyQueryOptions(query, select, options)
     }
 
-    deleteOne(filter: Partial<TRawDocs> = {}, options: Options = {}) {
+    deleteOne(filter: QueryFilter<TRawDocs> = {}, options: Options = {}) {
         return this.model.deleteOne(filter, options)
     }
 
-    deleteMany(filter: Partial<TRawDocs> = {}, options: Options = {}) {
+    deleteMany(filter: QueryFilter<TRawDocs> = {}, options: Options = {}) {
         return this.model.deleteMany(filter, options)
     }
 
-    findOneAndDelete(filter: Partial<TRawDocs> = {}, select?: Select, options: Options = {}) {
+    findOneAndDelete(filter: QueryFilter<TRawDocs> = {}, select?: Select, options: Options = {}) {
         const query = this.model.findOneAndDelete(filter, options)
 
         return this.applyQueryOptions(query, select, options)
@@ -123,11 +123,11 @@ export class DatabaseRepository<TRawDocs> {
         return this.applyQueryOptions(query, select, options)
     }
 
-    countDocuments(filter: Partial<TRawDocs> = {}, options: Options = {}) {
+    countDocuments(filter: QueryFilter<TRawDocs> = {}, options: Options = {}) {
         return this.model.countDocuments(filter, options)
     }
 
-    exists(filter: Partial<TRawDocs> = {}) {
+    exists(filter: QueryFilter<TRawDocs> = {}) {
         return this.model.exists(filter)
     }
 }
