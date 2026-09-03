@@ -17,6 +17,7 @@ const s3_service_1 = require("./common/services/s3.service");
 const node_stream_1 = require("node:stream");
 const node_util_1 = require("node:util");
 const notification_service_1 = require("./common/services/notification.service");
+const post_1 = require("./modules/post");
 const s3WriteStream = (0, node_util_1.promisify)(node_stream_1.pipeline);
 const bootstrap = async () => {
     const app = (0, express_1.default)();
@@ -31,6 +32,7 @@ const bootstrap = async () => {
         allowedHeaders: ["Content-Type", "Authorization",]
     }));
     app.use("/users", modules_1.authRouter);
+    app.use("/post", post_1.postRouter);
     await redis_service_1.redisService.connect();
     await (0, connection_1.default)();
     app.get("/get-cookie", (req, res) => {

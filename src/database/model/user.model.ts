@@ -58,8 +58,8 @@ userSchema
 
 userSchema.pre(["find", "findOne"], function () {
     const query = this.getQuery()
-    console.log("== query ==", query);
-    console.log("{ ...query }", { ...query });
+    // console.log("== query ==", query);
+    // console.log("{ ...query }", { ...query });
 
     if (query.paranoid === false) {
         this.setQuery({ ...query })
@@ -96,7 +96,6 @@ userSchema.pre(["updateOne", "findOneAndUpdate"], function () {
 
     }
 })
-
 
 userSchema.pre(["deleteOne", "findOneAndDelete"], function () {
 

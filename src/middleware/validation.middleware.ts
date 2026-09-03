@@ -11,17 +11,25 @@ export const validation = (schema: ValidationSchema) => {
         let validationError: { key: ValidationKey; issue: ZodError["issues"] }[] = []
 
         for (const key of Object.keys(schema) as ValidationKey[]) {
-            const validator = schema[key]
 
+            const validator = schema[key]
             if (!validator) {
                 continue
-            } else {
-                const value = validator.safeParse(req[key])
-
-                if (!value.success) {
-                    validationError.push({ key, issue: value.error.issues })
-                }
             }
+
+            if (req.file) {
+                req.body.file = req.file
+            }
+
+            if (req.files) {
+                req.body.files = req.files
+            }
+
+            const value = validator.safeParse(req[key])
+            if (!value.success) {
+                validationError.push({ key, issue: value.error.issues })
+            }
+
         }
 
         if (validationError.length > 0) {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redisService = void 0;
+exports.redisService = exports.RedisService = void 0;
 const redis_1 = require("redis");
 const config_1 = require("../../config");
 const application_exceptions_1 = require("../exceptions/application.exceptions");
@@ -141,4 +141,5 @@ class RedisService {
         return await this.client.del(this.FCM_key(userId));
     }
 }
+exports.RedisService = RedisService;
 exports.redisService = new RedisService();

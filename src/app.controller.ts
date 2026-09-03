@@ -1,5 +1,3 @@
-import { Types } from "mongoose";
-import { DatabaseRepository } from './database/repository/base.repository';
 import express from "express"
 import type { Express, Response, Request } from "express"
 import { authRouter } from "./modules"
@@ -14,10 +12,8 @@ import { s3Service } from "./common/services/s3.service"
 import { pipeline } from 'node:stream'
 import { promisify } from "node:util"
 import { notificationService } from "./common/services/notification.service"
-import userModel from "./database/model/user.model"
-import { IUser } from './common/interfaces';
-import { GenderEnum } from './common/enums';
-import { date } from "zod";
+import { postRouter } from "./modules/post"
+
 
 
 const s3WriteStream = promisify(pipeline)
@@ -36,12 +32,12 @@ export const bootstrap = async (): Promise<void> => {
         allowedHeaders: ["Content-Type", "Authorization",]
     }));
     app.use("/users", authRouter);
+    app.use("/post", postRouter);
 
 
 
     await redisService.connect()
     await DBconnection()
-
 
 
 

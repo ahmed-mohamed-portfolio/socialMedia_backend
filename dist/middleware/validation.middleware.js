@@ -11,11 +11,15 @@ const validation = (schema) => {
             if (!validator) {
                 continue;
             }
-            else {
-                const value = validator.safeParse(req[key]);
-                if (!value.success) {
-                    validationError.push({ key, issue: value.error.issues });
-                }
+            if (req.file) {
+                req.body.file = req.file;
+            }
+            if (req.files) {
+                req.body.files = req.files;
+            }
+            const value = validator.safeParse(req[key]);
+            if (!value.success) {
+                validationError.push({ key, issue: value.error.issues });
             }
         }
         if (validationError.length > 0) {

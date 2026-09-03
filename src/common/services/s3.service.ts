@@ -120,8 +120,8 @@ export class S3Service {
         files: Express.Multer.File[],
         ACL?: ObjectCannedACL,
         ContentType?: string | undefined,
-        StorageApproach: StorageApproachEnum,
-        UploadApproach: UploadApproachEnum
+        StorageApproach?: StorageApproachEnum,
+        UploadApproach?: UploadApproachEnum
     }): Promise<string[]> {
 
         let urls: string[] = []

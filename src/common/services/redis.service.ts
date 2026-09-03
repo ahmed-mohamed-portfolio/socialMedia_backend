@@ -1,9 +1,9 @@
 import { createClient, RedisClientType } from "redis"
 import { redis_uri } from "../../config"
-import { NotFoundException, ServiceUnavailableException } from "../exceptions/application.exceptions"
+import { ServiceUnavailableException } from "../exceptions/application.exceptions"
 import { ObjectId } from "mongoose"
 
-class RedisService {
+export class RedisService {
     private client: RedisClientType
 
     constructor() {

@@ -26,6 +26,7 @@ const authentication = async (req, res, next) => {
     }
     req.userId = decodedData.id;
     req.jti = decodedData.jti;
+    req.user = user;
     let blocked_Token = await redis_service_1.redisService.get(`RevokeToken::${req.userId}::${req.jti}`);
     if (blocked_Token) {
         throw new application_exceptions_1.BadRequestException('invalid token (blocked 1)');

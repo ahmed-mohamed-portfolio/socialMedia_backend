@@ -6,12 +6,14 @@ import { IUser } from "../common/interfaces"
 import { DatabaseRepository } from "../database/repository/base.repository"
 import userModel from "../database/model/user.model"
 import { JwtPayload } from "jsonwebtoken"
+import { HydratedDocument } from 'mongoose';
 
 declare global {
     namespace Express {
         interface Request {
             userId: string,
-            jti: string
+            jti: string,
+            user: HydratedDocument<IUser>
         }
     }
 }
@@ -41,6 +43,7 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
 
     req.userId = decodedData.id
     req.jti = decodedData.jti
+    req.user = user
 
     let blocked_Token = await redisService.get(`RevokeToken::${req.userId}::${req.jti}`)
     if (blocked_Token) {
