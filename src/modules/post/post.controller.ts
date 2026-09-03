@@ -11,11 +11,20 @@ import { postService } from "./post.service";
 const router = Router()
 
 
+
+router.get('/', authentication, async (req: Request, res: Response, next: NextFunction) => {
+    // console.log("req", req);
+
+    let data = await postService.postList(req.user)
+    return SuccessResponse({ res, status: 201, data })
+})
+
 router.post('/', authentication, cloudeFileUpload({ validation: fileFieldValidation.image, maxSize: 20 }).array("attachments", 2), validation(createPostSchema), async (req: Request, res: Response, next: NextFunction) => {
     // console.log("req", req);
 
     let data = await postService.createPost({ ...req.body, files: req.files }, req.user)
-    return SuccessResponse({ res, status: 201 })
+    return SuccessResponse({ res, status: 201, data })
 })
+
 
 export default router

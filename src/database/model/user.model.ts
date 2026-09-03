@@ -1,5 +1,5 @@
 import { BadRequestException } from './../../common/exceptions/application.exceptions';
-import mongoose, { HydratedDocument, models, UpdateQuery } from "mongoose"
+import mongoose, { HydratedDocument, models, Types, UpdateQuery } from "mongoose"
 import { IUser } from "../../common/interfaces"
 import { GenderEnum, ProviderEnum, RoleEnum } from "../../common/enums"
 import { SecurityService } from '../../common/services/security.services';
@@ -22,6 +22,12 @@ const userSchema = new Schema<IUser>({
             return this.provider === ProviderEnum.system
         }
     },
+    friends: [
+        {
+            type: Types.ObjectId, // هخزن ID
+            ref: "User"           // الـ ID ده تابع لـ User
+        }
+    ],
     dateOfBirth: { type: Date },
     gender: { type: String, default: GenderEnum.male },
     role: { type: Number, default: RoleEnum.user },

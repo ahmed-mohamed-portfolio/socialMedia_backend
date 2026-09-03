@@ -43,6 +43,12 @@ const userSchema = new Schema({
             return this.provider === 0 /* ProviderEnum.system */;
         }
     },
+    friends: [
+        {
+            type: mongoose_1.Types.ObjectId,
+            ref: "User" // الـ ID ده تابع لـ User
+        }
+    ],
     dateOfBirth: { type: Date },
     gender: { type: String, default: enums_1.GenderEnum.male },
     role: { type: Number, default: 1 /* RoleEnum.user */ },

@@ -9,6 +9,8 @@ import { PostRepository } from "../../database/repository/post.repository";
 import { NotFoundException } from '../../common/exceptions/application.exceptions';
 import { s3Service, S3Service } from '../../common/services/s3.service';
 import { notificationService } from '../../common/services/notification.service';
+import { AvailabilityEnum } from '../../common/enums';
+import { getAvailability } from '../../common/utils/post';
 
 
 export class PostService {
@@ -22,6 +24,15 @@ export class PostService {
         this.postRepository = new PostRepository()
         this.s3 = s3Service
 
+    }
+
+    async postList(user: HydratedDocument<IUser>): Promise<IPost[]> {
+        // console.log("userId", user._id);
+
+        let posts = await this.postRepository.find({
+            $or: getAvailability(user)
+        })
+        return posts
     }
 
     async createPost({ availability, content, files = [], tags }: createPostBodyDto, user: HydratedDocument<IUser>): Promise<IPost> {

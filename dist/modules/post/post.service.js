@@ -10,6 +10,7 @@ const post_repository_1 = require("../../database/repository/post.repository");
 const application_exceptions_2 = require("../../common/exceptions/application.exceptions");
 const s3_service_1 = require("../../common/services/s3.service");
 const notification_service_1 = require("../../common/services/notification.service");
+const post_1 = require("../../common/utils/post");
 class PostService {
     userRepository;
     postRepository;
@@ -18,6 +19,13 @@ class PostService {
         this.userRepository = new user_repository_1.UserRepository();
         this.postRepository = new post_repository_1.PostRepository();
         this.s3 = s3_service_1.s3Service;
+    }
+    async postList(user) {
+        // console.log("userId", user._id);
+        let posts = await this.postRepository.find({
+            $or: (0, post_1.getAvailability)(user)
+        });
+        return posts;
     }
     async createPost({ availability, content, files = [], tags }, user) {
         const mentions = [];
