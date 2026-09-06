@@ -1,4 +1,5 @@
 import { HydratedDocument, Model, PopulateOptions, QueryFilter, UpdateQuery } from "mongoose"
+import { IPaginate } from "../../common/interfaces/pagination.inteface"
 
 type Select = string | Record<string, 0 | 1>
 
@@ -75,6 +76,33 @@ export class DatabaseRepository<TRawDocs> {
         const query = this.model.find(filter, null, options)
 
         return this.applyQueryOptions(query, select, options)
+    }
+
+
+    async paginate(filter: QueryFilter<TRawDocs> = {}, select?: Select, options: Options = {}, page: number | string | undefined = 0, size: number | string | undefined = 5): Promise<IPaginate<TRawDocs>> {
+
+        let count: number = -1
+        if (Number(page) > 0) {
+            page = parseInt(page as string)
+            size = parseInt(size as string)
+
+            options.limit = size
+            options.skip = (page - 1) * size
+
+            count = await this.model.countDocuments(filter)
+        }
+
+        const docs = await this.find(filter, select, options)
+
+        return {
+            docs,
+            ...(Number(page) > 0 ? {
+                currentPage: page,
+                size,
+                pages: Math.ceil(count / Number(size))
+            }
+                : {})
+        }
     }
 
     findById(id: string, select?: Select, options: Options = {}) {

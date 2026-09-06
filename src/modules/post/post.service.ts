@@ -3,14 +3,14 @@ import { randomUUID } from 'node:crypto';
 import { redisService } from './../../common/services/redis.service';
 import { HydratedDocument, Types } from "mongoose";
 import { createPostBodyDto } from "./post.dto";
-import { IPost, IUser } from "../../common/interfaces";
+import { IPaginate, IPost, IUser } from "../../common/interfaces";
 import { UserRepository } from "../../database/repository/user.repository";
 import { PostRepository } from "../../database/repository/post.repository";
 import { NotFoundException } from '../../common/exceptions/application.exceptions';
 import { s3Service, S3Service } from '../../common/services/s3.service';
 import { notificationService } from '../../common/services/notification.service';
-import { AvailabilityEnum } from '../../common/enums';
 import { getAvailability } from '../../common/utils/post';
+import { PaginateDto } from '../../common/validation';
 
 
 export class PostService {
@@ -26,12 +26,16 @@ export class PostService {
 
     }
 
-    async postList(user: HydratedDocument<IUser>): Promise<IPost[]> {
-        // console.log("userId", user._id);
+    async postList({ page, search, size }: PaginateDto, user: HydratedDocument<IUser>): Promise<IPaginate<IPost>> {
 
-        let posts = await this.postRepository.find({
-            $or: getAvailability(user)
-        })
+        let posts = await this.postRepository.paginate({
+            $or: getAvailability(user),
+
+
+            ...(search ? { content: { $regex: search, $options: "i" } } : {})
+
+
+        }, undefined, { sort: { createdAt: -1 } }, page, size)
         return posts
     }
 

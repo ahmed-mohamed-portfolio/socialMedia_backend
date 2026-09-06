@@ -51,6 +51,26 @@ class DatabaseRepository {
         const query = this.model.find(filter, null, options);
         return this.applyQueryOptions(query, select, options);
     }
+    async paginate(filter = {}, select, options = {}, page = 0, size = 5) {
+        let count = -1;
+        if (Number(page) > 0) {
+            page = parseInt(page);
+            size = parseInt(size);
+            options.limit = size;
+            options.skip = (page - 1) * size;
+            count = await this.model.countDocuments(filter);
+        }
+        const docs = await this.find(filter, select, options);
+        return {
+            docs,
+            ...(Number(page) > 0 ? {
+                currentPage: page,
+                size,
+                pages: Math.ceil(count / Number(size))
+            }
+                : {})
+        };
+    }
     findById(id, select, options = {}) {
         const query = this.model.findById(id, null, options);
         return this.applyQueryOptions(query, select, options);

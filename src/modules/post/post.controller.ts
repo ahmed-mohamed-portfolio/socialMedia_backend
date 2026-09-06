@@ -6,16 +6,17 @@ import { SuccessResponse } from "../../common/exceptions/success.response";
 import { validation } from "../../middleware/validation.middleware";
 import { createPostSchema } from "./post.validation";
 import { postService } from "./post.service";
+import { PaginateDto, paginationValidationSchema } from "../../common/validation";
 
 
 const router = Router()
 
 
 
-router.get('/', authentication, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/', authentication, validation(paginationValidationSchema), async (req: Request, res: Response, next: NextFunction) => {
     // console.log("req", req);
 
-    let data = await postService.postList(req.user)
+    let data = await postService.postList(req.query as PaginateDto, req.user)
     return SuccessResponse({ res, status: 201, data })
 })
 

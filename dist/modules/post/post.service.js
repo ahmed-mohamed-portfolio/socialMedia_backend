@@ -20,11 +20,11 @@ class PostService {
         this.postRepository = new post_repository_1.PostRepository();
         this.s3 = s3_service_1.s3Service;
     }
-    async postList(user) {
-        // console.log("userId", user._id);
-        let posts = await this.postRepository.find({
-            $or: (0, post_1.getAvailability)(user)
-        });
+    async postList({ page, search, size }, user) {
+        let posts = await this.postRepository.paginate({
+            $or: (0, post_1.getAvailability)(user),
+            ...(search ? { content: { $regex: search, $options: "i" } } : {})
+        }, undefined, { sort: { createdAt: -1 } }, page, size);
         return posts;
     }
     async createPost({ availability, content, files = [], tags }, user) {
