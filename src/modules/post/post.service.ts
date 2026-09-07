@@ -31,9 +31,7 @@ export class PostService {
         let posts = await this.postRepository.paginate({
             $or: getAvailability(user),
 
-
             ...(search ? { content: { $regex: search, $options: "i" } } : {})
-
 
         }, undefined, { sort: { createdAt: -1 } }, page, size)
         return posts
