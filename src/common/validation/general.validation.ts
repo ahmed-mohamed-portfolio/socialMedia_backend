@@ -1,7 +1,6 @@
-
-
-
+import { Types } from 'mongoose';
 import { z } from "zod"
+
 
 export const generalValidationFields = {
     email: z.email(),
@@ -42,6 +41,8 @@ export const generalValidationFields = {
 
         })
     }
+    ,
+    id: z.string().refine(value => { return Types.ObjectId.isValid(value) }, "invalid objectId")
 }
 
 

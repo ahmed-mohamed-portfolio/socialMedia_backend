@@ -19,4 +19,9 @@ router.post('/', auth_middleware_1.authentication, (0, multer_1.cloudeFileUpload
     let data = await post_service_1.postService.createPost({ ...req.body, files: req.files }, req.user);
     return (0, success_response_1.SuccessResponse)({ res, status: 201, data });
 });
+router.patch('/:postId/react', auth_middleware_1.authentication, (0, validation_middleware_1.validation)(post_validation_1.reactPostSchema), async (req, res, next) => {
+    console.log("req.query", req.query);
+    let data = await post_service_1.postService.reactPost(req.params, req.query, req.user);
+    return (0, success_response_1.SuccessResponse)({ res, status: 200, data });
+});
 exports.default = router;

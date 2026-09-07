@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.paginationValidationSchema = exports.generalValidationFields = void 0;
+const mongoose_1 = require("mongoose");
 const zod_1 = require("zod");
 exports.generalValidationFields = {
     email: zod_1.z.email(),
@@ -32,7 +33,8 @@ exports.generalValidationFields = {
                 });
             }
         });
-    }
+    },
+    id: zod_1.z.string().refine(value => { return mongoose_1.Types.ObjectId.isValid(value); }, "invalid objectId")
 };
 exports.paginationValidationSchema = {
     query: zod_1.z.strictObject({

@@ -78,7 +78,6 @@ export class DatabaseRepository<TRawDocs> {
         return this.applyQueryOptions(query, select, options)
     }
 
-
     async paginate(filter: QueryFilter<TRawDocs> = {}, select?: Select, options: Options = {}, page: number | string | undefined = 0, size: number | string | undefined = 5): Promise<IPaginate<TRawDocs>> {
 
         let count: number = -1

@@ -49,3 +49,14 @@ export const createPostSchema = {
         }
     })
 }
+
+
+export const reactPostSchema = {
+    params: z.strictObject({
+        postId: generalValidationFields.id
+    })
+    ,
+    query: z.strictObject({
+        react: z.coerce.number()
+    })
+}

@@ -4,13 +4,13 @@ import { authentication } from "../../middleware/auth.middleware";
 import { cloudeFileUpload, fileFieldValidation } from "../../common/utils/multer";
 import { SuccessResponse } from "../../common/exceptions/success.response";
 import { validation } from "../../middleware/validation.middleware";
-import { createPostSchema } from "./post.validation";
+import { createPostSchema, reactPostSchema } from "./post.validation";
 import { postService } from "./post.service";
 import { PaginateDto, paginationValidationSchema } from "../../common/validation";
+import { ReactPostParamsDto, ReactPostQueryDto } from "./post.dto";
 
 
 const router = Router()
-
 
 
 router.get('/', authentication, validation(paginationValidationSchema), async (req: Request, res: Response, next: NextFunction) => {
@@ -25,6 +25,15 @@ router.post('/', authentication, cloudeFileUpload({ validation: fileFieldValidat
 
     let data = await postService.createPost({ ...req.body, files: req.files }, req.user)
     return SuccessResponse({ res, status: 201, data })
+})
+
+router.patch('/:postId/react', authentication, validation(reactPostSchema), async (req: Request, res: Response, next: NextFunction) => {
+    console.log("req.query", req.query);
+
+    let data = await postService.reactPost(req.params as ReactPostParamsDto, req.query as unknown as ReactPostQueryDto, req.user)
+
+    return SuccessResponse({ res, status: 200, data })
+
 })
 
 

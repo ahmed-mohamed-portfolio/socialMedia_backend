@@ -84,6 +84,18 @@ class PostService {
         }
         return post.toJSON();
     }
+    async reactPost({ postId }, { react }, user) {
+        const post = await this.postRepository.findOneAndUpdate({
+            _id: postId,
+            $or: (0, post_1.getAvailability)(user),
+        }, {
+            ...(Number(react) > 0 ? { $addToSet: { likes: user._id } } : { $pull: { likes: user._id } })
+        });
+        if (!post) {
+            throw new application_exceptions_2.NotFoundException("Fail to find matching post");
+        }
+        return post.toJSON();
+    }
 }
 exports.PostService = PostService;
 exports.postService = new PostService();

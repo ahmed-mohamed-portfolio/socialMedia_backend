@@ -2,7 +2,7 @@ import { BadRequestException } from './../../common/exceptions/application.excep
 import { randomUUID } from 'node:crypto';
 import { redisService } from './../../common/services/redis.service';
 import { HydratedDocument, Types } from "mongoose";
-import { createPostBodyDto } from "./post.dto";
+import { createPostBodyDto, ReactPostParamsDto, ReactPostQueryDto } from "./post.dto";
 import { IPaginate, IPost, IUser } from "../../common/interfaces";
 import { UserRepository } from "../../database/repository/user.repository";
 import { PostRepository } from "../../database/repository/post.repository";
@@ -113,6 +113,26 @@ export class PostService {
         return post.toJSON()
     }
 
+    async reactPost({ postId }: ReactPostParamsDto, { react }: ReactPostQueryDto, user: HydratedDocument<IUser>): Promise<IPost> {
+
+        const post = await this.postRepository.findOneAndUpdate(
+
+            {
+                _id: postId,
+                $or: getAvailability(user),
+            },
+            {
+                ...(Number(react) > 0 ? { $addToSet: { likes: user._id } } : { $pull: { likes: user._id } })
+            }
+
+        )
+
+        if (!post) {
+            throw new NotFoundException("Fail to find matching post")
+        }
+
+        return post.toJSON()
+    }
 
 }
 
