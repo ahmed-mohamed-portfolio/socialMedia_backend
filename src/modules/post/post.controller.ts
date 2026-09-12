@@ -4,10 +4,10 @@ import { authentication } from "../../middleware/auth.middleware";
 import { cloudeFileUpload, fileFieldValidation } from "../../common/utils/multer";
 import { SuccessResponse } from "../../common/exceptions/success.response";
 import { validation } from "../../middleware/validation.middleware";
-import { createPostSchema, reactPostSchema } from "./post.validation";
+import { createPostSchema, reactPostSchema, updatePostSchema } from "./post.validation";
 import { postService } from "./post.service";
 import { PaginateDto, paginationValidationSchema } from "../../common/validation";
-import { ReactPostParamsDto, ReactPostQueryDto } from "./post.dto";
+import { ReactPostParamsDto, ReactPostQueryDto, updatePostBodyDto, updatePostParamsDto } from "./post.dto";
 
 
 const router = Router()
@@ -28,7 +28,7 @@ router.post('/', authentication, cloudeFileUpload({ validation: fileFieldValidat
 })
 
 router.patch('/:postId/react', authentication, validation(reactPostSchema), async (req: Request, res: Response, next: NextFunction) => {
-    console.log("req.query", req.query);
+    // console.log("req.query", req.query);
 
     let data = await postService.reactPost(req.params as ReactPostParamsDto, req.query as unknown as ReactPostQueryDto, req.user)
 
@@ -36,5 +36,12 @@ router.patch('/:postId/react', authentication, validation(reactPostSchema), asyn
 
 })
 
+router.patch('/:postId', authentication, cloudeFileUpload({ validation: fileFieldValidation.image, maxSize: 20 }).array("attachments", 2), validation(updatePostSchema), async (req: Request, res: Response, next: NextFunction) => {
+    // console.log("req.query", req.query);
 
+    let data = await postService.updatePost(req.params as updatePostParamsDto, req.body as updatePostBodyDto, req.user)
+
+    return SuccessResponse({ res, status: 200, data })
+
+})
 export default router

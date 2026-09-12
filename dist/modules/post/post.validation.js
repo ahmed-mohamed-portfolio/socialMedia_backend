@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reactPostSchema = exports.createPostSchema = void 0;
+exports.reactPostSchema = exports.updatePostSchema = exports.createPostSchema = void 0;
 const zod_1 = require("zod");
 const enums_1 = require("../../common/enums");
 const mongoose_1 = require("mongoose");
@@ -40,6 +40,37 @@ exports.createPostSchema = {
                         message: `Invalid tagged objectId ${tag}`
                     });
                 }
+            }
+        }
+    })
+};
+exports.updatePostSchema = {
+    params: zod_1.z.strictObject({
+        postId: validation_1.generalValidationFields.id
+    }),
+    body: zod_1.z.strictObject({
+        content: zod_1.z.string().optional(),
+        removeFiles: zod_1.z.array(zod_1.z.string()).optional(),
+        removeTags: zod_1.z.array(zod_1.z.string()).optional(),
+        files: zod_1.z.array(validation_1.generalValidationFields.file(multer_1.fileFieldValidation.image)).optional(),
+        tags: zod_1.z.array(validation_1.generalValidationFields.id).optional(),
+        availability: zod_1.z.coerce.number().optional()
+    }).superRefine((args, ctx) => {
+        if (!Object.values(args)?.length) {
+            ctx.addIssue({
+                code: "custom",
+                message: "Insert data to update"
+            });
+        }
+        if (args.tags?.length) {
+            // التأكد إن مفيش tags متكررة
+            const uniqueTags = [...new Set(args.tags)];
+            if (uniqueTags.length != args.tags.length) {
+                ctx.addIssue({
+                    code: "custom",
+                    path: ["tags"],
+                    message: "Duplicated tag"
+                });
             }
         }
     })

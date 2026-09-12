@@ -81,8 +81,39 @@ class DatabaseRepository {
     updateMany(filter = {}, data = {}, options = {}) {
         return this.model.updateMany(filter, { ...data, $inc: { ...data.$inc, __v: 1 } }, options);
     }
-    findOneAndUpdate(filter = {}, data = {}, select, options = {}) {
-        const query = this.model.findOneAndUpdate(filter, { ...data, $inc: { ...data.$inc, __v: 1 } }, { ...options, new: options.new ?? true });
+    async findOneAndUpdate(filter = {}, data = {}, select, options = {}) {
+        // Update العادي = نفّذ أوامر تعديل مباشرة.
+        // Aggregation Pipeline = احسب وغيّر الـ document على مراحل.
+        let query;
+        if (Array.isArray(data)) {
+            const pipeline = [
+                ...data,
+                {
+                    $set: {
+                        __v: {
+                            $add: ["$__v", 1]
+                        }
+                    }
+                }
+            ];
+            query = this.model.findOneAndUpdate(filter, pipeline, {
+                ...options,
+                new: options.new ?? true,
+                updatePipeline: true
+            });
+        }
+        else {
+            query = this.model.findOneAndUpdate(filter, {
+                ...data,
+                $inc: {
+                    ...data.$inc,
+                    __v: 1
+                }
+            }, {
+                ...options,
+                new: options.new ?? true
+            });
+        }
         return this.applyQueryOptions(query, select, options);
     }
     findByIdAndUpdate(id, data = {}, select, options = {}) {

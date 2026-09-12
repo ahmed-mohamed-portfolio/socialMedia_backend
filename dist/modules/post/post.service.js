@@ -11,6 +11,7 @@ const application_exceptions_2 = require("../../common/exceptions/application.ex
 const s3_service_1 = require("../../common/services/s3.service");
 const notification_service_1 = require("../../common/services/notification.service");
 const post_1 = require("../../common/utils/post");
+const objectId_1 = require("../../common/utils/objectId");
 class PostService {
     userRepository;
     postRepository;
@@ -95,6 +96,105 @@ class PostService {
             throw new application_exceptions_2.NotFoundException("Fail to find matching post");
         }
         return post.toJSON();
+    }
+    async updatePost({ postId }, { availability, content, files = [], tags = [], removeFiles = [], removeTags = [] }, user) {
+        // console.log("removeTags", removeTags);
+        const post = await this.postRepository.findOne({
+            _id: postId,
+            createdBy: user._id
+        });
+        if (!post) {
+            throw new application_exceptions_2.NotFoundException("Fail to find matching post in updatePOst");
+        }
+        if (!post.content && !content && !files?.length && post.attachments?.length == removeFiles.length) {
+            throw new application_exceptions_1.BadRequestException("We cannot leave empty post");
+        }
+        const mentions = [];
+        const FCM_Tokens = [];
+        if (tags?.length) {
+            const mentionedAccounts = await this.userRepository.find({ _id: { $in: tags } });
+            if (mentionedAccounts.length != tags.length) {
+                throw new application_exceptions_2.NotFoundException("Fail to find some or all mentioned accounts");
+            }
+            for (const tag of tags) {
+                mentions.push((0, objectId_1.toObjectId)(tag));
+                (await redis_service_1.redisService.getFCMs(tag) || []).map(token => FCM_Tokens.push(token));
+                /* another way
+
+                const tokens = await redisService.getFCMs(tag) || []
+                FCM_Tokens.push(...tokens)
+
+                */
+            }
+        }
+        const folderId = post.folderId;
+        let attachments = [];
+        if (files?.length) {
+            attachments = await this.s3.uploadAssets({
+                files: files,
+                path: `Posts/${folderId}`
+            });
+        }
+        let upadePost = await this.postRepository.findOneAndUpdate({
+            _id: postId,
+            createdBy: user._id,
+        }, [
+            {
+                $set: {
+                    content: content || post.content,
+                    availability: Number(availability || post.availability),
+                    updatedBy: user._id,
+                    attachments: {
+                        $setUnion: [
+                            {
+                                $setDifference: [
+                                    "$attachments",
+                                    removeFiles
+                                ]
+                            },
+                            attachments
+                        ]
+                    },
+                    tags: {
+                        $setUnion: [
+                            {
+                                $setDifference: [
+                                    "$tags",
+                                    removeTags.map(ele => { return (0, objectId_1.toObjectId)(ele); })
+                                ]
+                            },
+                            mentions
+                        ]
+                    }
+                }
+            }
+        ]);
+        if (!upadePost) {
+            if (attachments?.length) {
+                await this.s3.deleteAssets({
+                    Keys: attachments.map(ele => { return { Key: ele }; })
+                });
+            }
+            throw new application_exceptions_1.BadRequestException("fail in create post");
+        }
+        if (removeFiles.length) {
+            await this.s3.deleteAssets({
+                Keys: removeFiles.map(ele => { return { Key: ele }; })
+            });
+        }
+        if (FCM_Tokens?.length) {
+            await notification_service_1.notificationService.sendNotificationToTokens({
+                tokens: FCM_Tokens,
+                data: {
+                    title: "Post Mention",
+                    body: JSON.stringify({
+                        message: `${user.userName} mention you in his post`,
+                        postId: post._id
+                    })
+                }
+            });
+        }
+        return upadePost.toJSON();
     }
 }
 exports.PostService = PostService;
