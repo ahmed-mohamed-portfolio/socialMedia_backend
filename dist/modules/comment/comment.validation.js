@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCommentSchema = void 0;
+exports.createReplyOnCommentSchema = exports.createCommentSchema = void 0;
 const zod_1 = require("zod");
 const validation_1 = require("../../common/validation");
 const multer_1 = require("../../common/utils/multer");
@@ -33,4 +33,11 @@ exports.createCommentSchema = {
             }
         }
     })
+};
+exports.createReplyOnCommentSchema = {
+    params: zod_1.z.strictObject({
+        postId: validation_1.generalValidationFields.id,
+        commentId: validation_1.generalValidationFields.id
+    }),
+    body: exports.createCommentSchema.body
 };

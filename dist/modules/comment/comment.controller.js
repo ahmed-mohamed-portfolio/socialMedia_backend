@@ -13,4 +13,9 @@ router.post('/', auth_middleware_1.authentication, (0, multer_1.cloudeFileUpload
     let data = await comment_service_1.commentService.createComment(req.params, { ...req.body, files: req.files }, req.user);
     return (0, success_response_1.SuccessResponse)({ res, status: 201, data });
 });
+router.post('/:commentId/reply', auth_middleware_1.authentication, (0, multer_1.cloudeFileUpload)({ validation: multer_1.fileFieldValidation.image, maxSize: 20 }).array("attachments", 2), (0, validation_middleware_1.validation)(comment_validation_1.createReplyOnCommentSchema), async (req, res, next) => {
+    // console.log("req", req);
+    let data = await comment_service_1.commentService.replyOnComment(req.params, { ...req.body, files: req.files }, req.user);
+    return (0, success_response_1.SuccessResponse)({ res, status: 201, data });
+});
 exports.default = router;

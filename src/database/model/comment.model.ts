@@ -50,7 +50,11 @@ const commentSchema = new Schema<IComment>(
     }
 )
 
-
+commentSchema.virtual("reply", {
+    localField: '_id',
+    foreignField: "commentId",
+    ref: "Comment"
+})
 
 commentSchema.pre(["find", "findOne"], function () {
     const query = this.getQuery()

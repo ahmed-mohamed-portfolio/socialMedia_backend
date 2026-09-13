@@ -41,3 +41,17 @@ export const createCommentSchema = {
     })
 }
 
+
+
+
+
+export const createReplyOnCommentSchema = {
+    params: z.strictObject({
+        postId: generalValidationFields.id,
+        commentId: generalValidationFields.id
+
+    })
+    ,
+    body: createCommentSchema.body
+}
+

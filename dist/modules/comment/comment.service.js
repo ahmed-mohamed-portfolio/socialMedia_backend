@@ -86,6 +86,78 @@ class CommentService {
         }
         return comment.toJSON();
     }
+    async replyOnComment({ postId, commentId }, { content, files = [], tags }, user) {
+        let comment = await this.commentRepository.findone({
+            _id: commentId,
+            postId: postId,
+        }, undefined, [{
+                path: "postId",
+                match: {
+                    $or: (0, post_1.getAvailability)(user)
+                }
+            }]);
+        if (!comment.postId) {
+            throw new application_exceptions_2.NotFoundException('fail to find matching comment');
+        }
+        const mentions = [];
+        const FCM_Tokens = [];
+        if (tags?.length) {
+            const mentionedAccounts = await this.userRepository.find({ _id: { $in: tags } });
+            if (mentionedAccounts.length != tags.length) {
+                throw new application_exceptions_2.NotFoundException("Fail to find some or all mentioned accounts");
+            }
+            for (const tag of tags) {
+                mentions.push(mongoose_1.Types.ObjectId.createFromHexString(tag));
+                (await redis_service_1.redisService.getFCMs(tag) || []).map(token => FCM_Tokens.push(token));
+                /* another way
+
+                const tokens = await redisService.getFCMs(tag) || []
+                FCM_Tokens.push(...tokens)
+
+                */
+            }
+        }
+        const post = comment.postId;
+        const folderId = post.folderId;
+        let attachments = [];
+        if (files?.length) {
+            attachments = await this.s3.uploadAssets({
+                files: files,
+                path: `Posts/${folderId}`
+            });
+        }
+        let reply = await this.commentRepository.insertOne({
+            createdBy: user._id,
+            content: content,
+            attachments,
+            postId: post._id,
+            commentId: comment._id,
+            tags: mentions
+        });
+        if (!reply) {
+            if (attachments?.length) {
+                await this.s3.deleteAssets({
+                    Keys: attachments.map(ele => { return { Key: ele }; })
+                });
+            }
+            throw new application_exceptions_1.BadRequestException("fail in create post");
+        }
+        if (FCM_Tokens?.length) {
+            await notification_service_1.notificationService.sendNotificationToTokens({
+                tokens: FCM_Tokens,
+                data: {
+                    title: "Post Mention",
+                    body: JSON.stringify({
+                        message: `${user.userName} mention you in his comment`,
+                        postId: post._id,
+                        commentId: comment._id,
+                        replyId: reply._id
+                    })
+                }
+            });
+        }
+        return reply.toJSON();
+    }
 }
 exports.CommentService = CommentService;
 exports.commentService = new CommentService();

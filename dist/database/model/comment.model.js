@@ -57,6 +57,11 @@ const commentSchema = new Schema({
     strictQuery: true,
     collection: "SOCIAL_APP_COMMENTS"
 });
+commentSchema.virtual("reply", {
+    localField: '_id',
+    foreignField: "commentId",
+    ref: "Comment"
+});
 commentSchema.pre(["find", "findOne"], function () {
     const query = this.getQuery();
     // console.log("== query ==", query);

@@ -25,7 +25,7 @@ class PostService {
         let posts = await this.postRepository.paginate({
             $or: (0, post_1.getAvailability)(user),
             ...(search ? { content: { $regex: search, $options: "i" } } : {})
-        }, undefined, { sort: { createdAt: -1 }, populate: [{ path: "comments" }] }, page, size);
+        }, undefined, { sort: { createdAt: -1 }, populate: [{ path: "comments", populate: [{ path: "reply", populate: [{ path: "reply" }] }] }] }, page, size);
         return posts;
     }
     async createPost({ availability, content, files = [], tags }, user) {
