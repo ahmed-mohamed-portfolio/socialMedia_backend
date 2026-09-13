@@ -8,7 +8,9 @@ const validation_middleware_1 = require("../../middleware/validation.middleware"
 const post_validation_1 = require("./post.validation");
 const post_service_1 = require("./post.service");
 const validation_1 = require("../../common/validation");
+const comment_1 = require("../comment");
 const router = (0, express_1.Router)();
+router.use('/:postId/comment', comment_1.commentRouter);
 router.get('/', auth_middleware_1.authentication, (0, validation_middleware_1.validation)(validation_1.paginationValidationSchema), async (req, res, next) => {
     // console.log("req", req);
     let data = await post_service_1.postService.postList(req.query, req.user);

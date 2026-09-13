@@ -8,10 +8,12 @@ import { createPostSchema, reactPostSchema, updatePostSchema } from "./post.vali
 import { postService } from "./post.service";
 import { PaginateDto, paginationValidationSchema } from "../../common/validation";
 import { ReactPostParamsDto, ReactPostQueryDto, updatePostBodyDto, updatePostParamsDto } from "./post.dto";
+import { commentRouter } from "../comment";
 
 
 const router = Router()
 
+router.use('/:postId/comment', commentRouter)
 
 router.get('/', authentication, validation(paginationValidationSchema), async (req: Request, res: Response, next: NextFunction) => {
     // console.log("req", req);

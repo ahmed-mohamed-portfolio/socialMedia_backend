@@ -54,7 +54,14 @@ const postSchema = new Schema<IPost>(
 )
 
 
+postSchema.virtual("comments", {
 
+    localField: "_id",
+    foreignField: "postId",
+    ref: "Comment",
+    justOne: true
+
+})
 
 
 

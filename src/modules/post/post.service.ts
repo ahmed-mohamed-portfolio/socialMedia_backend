@@ -34,7 +34,7 @@ export class PostService {
 
             ...(search ? { content: { $regex: search, $options: "i" } } : {})
 
-        }, undefined, { sort: { createdAt: -1 } }, page, size)
+        }, undefined, { sort: { createdAt: -1 }, populate: [{ path: "comments" }] }, page, size)
         return posts
     }
 
