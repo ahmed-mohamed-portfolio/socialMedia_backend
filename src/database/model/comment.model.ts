@@ -73,7 +73,7 @@ commentSchema.pre(["updateOne", "findOneAndUpdate"], function () {
 
 
     const update = this.getUpdate() as UpdateQuery<IUser>
-    console.log("update", update);
+    // console.log("update", update);
 
     if (update.deletedAt) {
         this.setUpdate({ ...update, $unset: { restoredAt: 1 } })

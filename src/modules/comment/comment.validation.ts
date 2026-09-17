@@ -41,10 +41,6 @@ export const createCommentSchema = {
     })
 }
 
-
-
-
-
 export const createReplyOnCommentSchema = {
     params: z.strictObject({
         postId: generalValidationFields.id,
@@ -55,3 +51,19 @@ export const createReplyOnCommentSchema = {
     body: createCommentSchema.body
 }
 
+export const updateCommentSchema = {
+    params: z.strictObject({
+        postId: generalValidationFields.id,
+        commentId: generalValidationFields.id
+    }),
+    body: z.strictObject({
+        content: z.string().trim().min(1, "Comment content is required")
+    })
+};
+
+export const deleteCommentSchema = {
+    params: z.strictObject({
+        postId: generalValidationFields.id,
+        commentId: generalValidationFields.id
+    })
+};

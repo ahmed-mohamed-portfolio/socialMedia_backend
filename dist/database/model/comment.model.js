@@ -75,7 +75,7 @@ commentSchema.pre(["find", "findOne"], function () {
 });
 commentSchema.pre(["updateOne", "findOneAndUpdate"], function () {
     const update = this.getUpdate();
-    console.log("update", update);
+    // console.log("update", update);
     if (update.deletedAt) {
         this.setUpdate({ ...update, $unset: { restoredAt: 1 } });
     }

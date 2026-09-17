@@ -104,3 +104,26 @@ export const reactPostSchema = {
         react: z.coerce.number()
     })
 }
+
+export const getSinglePostSchema = {
+    params: z.strictObject({
+        id: generalValidationFields.id
+    })
+
+}
+
+export const getUserPostsSchema = {
+    params: z.strictObject({
+        userId: generalValidationFields.id
+    })
+
+}
+
+export const deletePostSchema = {
+    params: z.strictObject({
+        postId: generalValidationFields.id
+    })
+
+}
+
+

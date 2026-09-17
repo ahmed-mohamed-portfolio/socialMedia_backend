@@ -205,7 +205,7 @@ class authService {
     }
     async getUserProfile(userId) {
         const userInfo = await this.userRepository.findById(userId, '-password');
-        console.log(userInfo);
+        // console.log(userInfo);
         if (!userInfo) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }
@@ -216,14 +216,14 @@ class authService {
     }
     async profileImage(file, userId) {
         const user = await this.userRepository.findById(userId, '-password');
-        console.log("user", user);
+        // console.log("user", user);
         if (!user) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }
         const oldPic = user.profilePic;
-        console.log("file", file);
+        // console.log("file", file);
         const { Key } = await this.s3.uploadLargeAsset({ file, path: `Users/${user.id.toString()}/Profile`, StorageApproach: multer_enum_1.StorageApproachEnum.DISK, partSize: 5 });
-        console.log("{ Key }", { Key });
+        // console.log("{ Key }", { Key });
         user.profilePic = Key;
         await user.save();
         if (oldPic) {
@@ -233,7 +233,7 @@ class authService {
     }
     async profileImageByPreSignedLink({ Originalname, ContentType }, userId) {
         const user = await this.userRepository.findById(userId, '-password');
-        console.log("user", user);
+        // console.log("user", user);
         if (!user) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }
@@ -248,14 +248,14 @@ class authService {
     }
     async profileCoverImages(files, userId) {
         const user = await this.userRepository.findById(userId, '-password');
-        console.log("user", user);
+        // console.log("user", user);
         if (!user) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }
         const oldUrls = user.profileCoverPic;
-        console.log("files", files);
+        // console.log("files", files);
         const urls = await this.s3.uploadAssets({ files, path: `Users/${user.id.toString()}/Profile/cover`, StorageApproach: multer_enum_1.StorageApproachEnum.DISK, UploadApproach: multer_enum_1.UploadApproachEnum.LARGE });
-        console.log("urls", urls);
+        // console.log("urls", urls);
         user.profileCoverPic = urls;
         await user.save();
         if (oldUrls?.length) {
@@ -267,7 +267,7 @@ class authService {
     }
     async deleteProfile(userId) {
         const user = await this.userRepository.findById(userId, '-password');
-        console.log("user", user);
+        // console.log("user", user);
         if (!user) {
             throw new application_exceptions_1.NotFoundException("user NOt Found");
         }

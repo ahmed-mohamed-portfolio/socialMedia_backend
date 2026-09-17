@@ -25,7 +25,7 @@ class PostService {
         let posts = await this.postRepository.paginate({
             $or: (0, post_1.getAvailability)(user),
             ...(search ? { content: { $regex: search, $options: "i" } } : {})
-        }, undefined, { sort: { createdAt: -1 }, populate: [{ path: "comments", populate: [{ path: "reply", populate: [{ path: "reply" }] }] }] }, page, size);
+        }, undefined, { sort: { createdAt: -1 }, populate: [{ path: "createdBy" }, { path: "comments", options: { sort: { createdAt: -1 } }, populate: [{ path: "createdBy" }, { path: "reply", populate: [{ path: "reply" }] }] }] }, page, size);
         return posts;
     }
     async createPost({ availability, content, files = [], tags }, user) {
@@ -98,7 +98,6 @@ class PostService {
         return post.toJSON();
     }
     async updatePost({ postId }, { availability, content, files = [], tags = [], removeFiles = [], removeTags = [] }, user) {
-        // console.log("removeTags", removeTags);
         const post = await this.postRepository.findOne({
             _id: postId,
             createdBy: user._id
@@ -195,6 +194,62 @@ class PostService {
             });
         }
         return upadePost.toJSON();
+    }
+    async getSinglePost({ id }) {
+        const post = await this.postRepository.findOne({
+            _id: id,
+        }, undefined, { populate: [{ path: "createdBy" }, { path: "comments" }] });
+        if (!post) {
+            throw new application_exceptions_2.NotFoundException("Fail to find matching post");
+        }
+        return post.toJSON();
+    }
+    async userPosts({ userId }) {
+        const posts = await this.postRepository.find({
+            createdBy: userId
+        }, undefined, {
+            sort: { createdAt: -1 },
+            populate: [
+                {
+                    path: "createdBy",
+                },
+                {
+                    path: "comments",
+                    options: { sort: { createdAt: -1 } },
+                    populate: [
+                        {
+                            path: "createdBy",
+                        },
+                        {
+                            path: "reply",
+                            populate: [
+                                {
+                                    path: "createdBy",
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+        return posts;
+    }
+    async deletePost({ postId }, user) {
+        const post = await this.postRepository.findOneAndUpdate({
+            _id: postId,
+            createdBy: user._id,
+            deletedAt: { $exists: false }
+        }, {
+            $set: {
+                deletedAt: new Date(),
+                updatedBy: user._id
+            },
+            $unset: { restoredAt: 1 }
+        });
+        if (!post) {
+            throw new application_exceptions_2.NotFoundException("Post not found");
+        }
+        return post.toJSON();
     }
 }
 exports.PostService = PostService;

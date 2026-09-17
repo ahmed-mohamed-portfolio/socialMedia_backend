@@ -19,6 +19,7 @@ import { postRouter } from "./modules/post"
 const s3WriteStream = promisify(pipeline)
 
 export const bootstrap = async (): Promise<void> => {
+
     const app: Express = express()
 
     app.use(express.json());
@@ -57,9 +58,9 @@ export const bootstrap = async (): Promise<void> => {
 
         const { path } = req.params as { path: string[] }
         const Key = path.join('/')
-        console.log("i am here");
+        // console.log("i am here");
         const { Body, ContentType } = await s3Service.getAsset({ Key })
-        console.log({ Body, ContentType });
+        // console.log({ Body, ContentType });
         res.setHeader(
             "Content-Type",
             ContentType || "application/octet-stream"

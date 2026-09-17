@@ -63,6 +63,11 @@ class CommentService {
             postId: post._id,
             tags: mentions
         });
+        let populatedComment = await this.commentRepository.findById(comment._id.toString(), undefined, {
+            populate: {
+                path: "createdBy",
+            }
+        });
         if (!comment) {
             if (attachments?.length) {
                 await this.s3.deleteAssets({
@@ -84,7 +89,7 @@ class CommentService {
                 }
             });
         }
-        return comment.toJSON();
+        return populatedComment;
     }
     async replyOnComment({ postId, commentId }, { content, files = [], tags }, user) {
         let comment = await this.commentRepository.findone({
@@ -157,6 +162,41 @@ class CommentService {
             });
         }
         return reply.toJSON();
+    }
+    async updateComment({ postId, commentId }, { content }, user) {
+        const comment = await this.commentRepository.findOneAndUpdate({
+            _id: commentId,
+            postId,
+            createdBy: user._id,
+            deletedAt: { $exists: false }
+        }, {
+            $set: {
+                content,
+                updatedBy: user._id
+            }
+        });
+        if (!comment) {
+            throw new application_exceptions_2.NotFoundException("Comment not found");
+        }
+        return comment.toJSON();
+    }
+    async deleteComment({ postId, commentId }, user) {
+        const comment = await this.commentRepository.findOneAndUpdate({
+            _id: commentId,
+            postId,
+            createdBy: user._id,
+            deletedAt: { $exists: false }
+        }, {
+            $set: {
+                deletedAt: new Date(),
+                updatedBy: user._id
+            },
+            $unset: { restoredAt: 1 }
+        });
+        if (!comment) {
+            throw new application_exceptions_2.NotFoundException("Comment not found");
+        }
+        return comment.toJSON();
     }
 }
 exports.CommentService = CommentService;

@@ -41,7 +41,7 @@ class S3Service {
                 },
             */
         }
-        console.log(command);
+        // console.log(command);
         await this.client.send(command);
         return command.input?.Key;
     }

@@ -167,7 +167,7 @@ router.get('/generate-access-token', async (req: Request, res: Response) => {
 })
 
 router.get('/get-user-profile', authentication, async (req: Request, res: Response) => {
-    console.log("req.userId", req.userId);
+    // console.log("req.userId", req.userId);
 
     let userData = await authService.getUserProfile(req.userId)
 
@@ -201,7 +201,7 @@ router.patch('/profile-image-byPreSignedLink', authentication, async (req: Reque
 })
 
 router.patch('/profile-cover-images', authentication, cloudeFileUpload({ StorageApproach: StorageApproachEnum.DISK, validation: fileFieldValidation.image, maxSize: 20 }).array("attachments", 2), async (req: Request, res: Response) => {
-    console.log("req.files", req.files);
+    // console.log("req.files", req.files);
 
     let userData = await authService.profileCoverImages(req.files as Express.Multer.File[], req.userId)
 

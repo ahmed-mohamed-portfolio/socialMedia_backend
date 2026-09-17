@@ -79,7 +79,7 @@ userSchema.pre(["updateOne", "findOneAndUpdate"], function () {
 
 
     const update = this.getUpdate() as UpdateQuery<IUser>
-    console.log("update", update);
+    // console.log("update", update);
 
     if (update.deletedAt) {
         this.setUpdate({ ...update, $unset: { restoredAt: 1 } })
@@ -93,7 +93,7 @@ userSchema.pre(["updateOne", "findOneAndUpdate"], function () {
 
 
     const query = this.getQuery()
-    console.log("query", query);
+    // console.log("query", query);
 
     if (query.paranoid === false) {
         this.setQuery({ ...query })
@@ -107,7 +107,7 @@ userSchema.pre(["deleteOne", "findOneAndDelete"], function () {
 
 
     const query = this.getQuery()
-    console.log("query", query);
+    // console.log("query", query);
 
     if (query.force === false) {
         this.setQuery({ ...query })
@@ -119,8 +119,8 @@ userSchema.pre(["deleteOne", "findOneAndDelete"], function () {
 
 userSchema.pre("save", async function (this: HydratedDocument<IUser> & { wasNew: boolean }) {
 
-    console.log(this.modifiedPaths());
-    console.log(this.isNew);
+    // console.log(this.modifiedPaths());
+    // console.log(this.isNew);
     this.wasNew = this.isNew
     if (this.isModified('password')) {
         this.password = await new SecurityService().generateHash({ planText: this.password })

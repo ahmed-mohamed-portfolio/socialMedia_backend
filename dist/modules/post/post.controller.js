@@ -27,8 +27,19 @@ router.patch('/:postId/react', auth_middleware_1.authentication, (0, validation_
     return (0, success_response_1.SuccessResponse)({ res, status: 200, data });
 });
 router.patch('/:postId', auth_middleware_1.authentication, (0, multer_1.cloudeFileUpload)({ validation: multer_1.fileFieldValidation.image, maxSize: 20 }).array("attachments", 2), (0, validation_middleware_1.validation)(post_validation_1.updatePostSchema), async (req, res, next) => {
-    // console.log("req.query", req.query);
     let data = await post_service_1.postService.updatePost(req.params, req.body, req.user);
+    return (0, success_response_1.SuccessResponse)({ res, status: 200, data });
+});
+router.get('/:id', auth_middleware_1.authentication, (0, validation_middleware_1.validation)(post_validation_1.getSinglePostSchema), async (req, res, next) => {
+    let data = await post_service_1.postService.getSinglePost(req.params);
+    return (0, success_response_1.SuccessResponse)({ res, status: 200, data });
+});
+router.get('/user/:userId', auth_middleware_1.authentication, (0, validation_middleware_1.validation)(post_validation_1.getUserPostsSchema), async (req, res, next) => {
+    let data = await post_service_1.postService.userPosts(req.params);
+    return (0, success_response_1.SuccessResponse)({ res, status: 200, data });
+});
+router.delete('/:postId', auth_middleware_1.authentication, (0, validation_middleware_1.validation)(post_validation_1.deletePostSchema), async (req, res, next) => {
+    let data = await post_service_1.postService.deletePost(req.params, req.user);
     return (0, success_response_1.SuccessResponse)({ res, status: 200, data });
 });
 exports.default = router;

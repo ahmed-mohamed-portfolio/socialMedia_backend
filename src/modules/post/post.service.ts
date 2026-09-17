@@ -2,7 +2,7 @@ import { BadRequestException } from './../../common/exceptions/application.excep
 import { randomUUID } from 'node:crypto';
 import { redisService } from './../../common/services/redis.service';
 import { HydratedDocument, Types } from "mongoose";
-import { createPostBodyDto, ReactPostParamsDto, ReactPostQueryDto, updatePostBodyDto, updatePostParamsDto } from "./post.dto";
+import { createPostBodyDto, deletePostSchemaDto, getSinglePostParamsDto, getUserPostsParamDto, ReactPostParamsDto, ReactPostQueryDto, updatePostBodyDto, updatePostParamsDto } from "./post.dto";
 import { IPaginate, IPost, IUser } from "../../common/interfaces";
 import { UserRepository } from "../../database/repository/user.repository";
 import { PostRepository } from "../../database/repository/post.repository";
@@ -34,7 +34,7 @@ export class PostService {
 
             ...(search ? { content: { $regex: search, $options: "i" } } : {})
 
-        }, undefined, { sort: { createdAt: -1 }, populate: [{ path: "comments", populate: [{ path: "reply", populate: [{ path: "reply" }] }] }] }, page, size)
+        }, undefined, { sort: { createdAt: -1 }, populate: [{ path: "createdBy" }, { path: "comments", options: { sort: { createdAt: -1 } }, populate: [{ path: "createdBy" }, { path: "reply", populate: [{ path: "reply" }] }] }] }, page, size)
         return posts
     }
 
@@ -137,8 +137,6 @@ export class PostService {
 
     async updatePost({ postId }: updatePostParamsDto, { availability, content, files = [], tags = [], removeFiles = [], removeTags = [] }: updatePostBodyDto, user: HydratedDocument<IUser>): Promise<IPost> {
 
-        // console.log("removeTags", removeTags);
-
         const post = await this.postRepository.findOne({
             _id: postId,
             createdBy: user._id
@@ -212,6 +210,7 @@ export class PostService {
                                         removeFiles
                                     ]
                                 },
+
                                 attachments
                             ]
 
@@ -268,6 +267,78 @@ export class PostService {
         }
 
         return upadePost.toJSON()
+    }
+
+    async getSinglePost({ id }: getSinglePostParamsDto): Promise<IPost> {
+        const post = await this.postRepository.findOne({
+            _id: id,
+        }, undefined, { populate: [{ path: "createdBy" }, { path: "comments" }] })
+
+        if (!post) {
+            throw new NotFoundException("Fail to find matching post")
+        }
+
+        return post.toJSON()
+    }
+
+    async userPosts({ userId }: getUserPostsParamDto): Promise<IPost[]> {
+        const posts = await this.postRepository.find(
+            {
+                createdBy: userId
+            },
+            undefined,
+            {
+                sort: { createdAt: -1 },
+                populate: [
+                    {
+                        path: "createdBy",
+                    },
+                    {
+                        path: "comments",
+                        options: { sort: { createdAt: -1 } },
+                        populate: [
+                            {
+                                path: "createdBy",
+                            },
+                            {
+                                path: "reply",
+                                populate: [
+                                    {
+                                        path: "createdBy",
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        )
+
+        return posts
+    }
+
+    async deletePost({ postId }: deletePostSchemaDto, user: HydratedDocument<IUser>): Promise<IPost> {
+
+        const post = await this.postRepository.findOneAndUpdate(
+            {
+                _id: postId,
+                createdBy: user._id,
+                deletedAt: { $exists: false }
+            },
+            {
+                $set: {
+                    deletedAt: new Date(),
+                    updatedBy: user._id
+                },
+                $unset: { restoredAt: 1 }
+            }
+        );
+
+        if (!post) {
+            throw new NotFoundException("Post not found");
+        }
+
+        return post.toJSON();
     }
 
 }

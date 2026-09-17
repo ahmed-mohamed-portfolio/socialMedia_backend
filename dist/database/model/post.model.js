@@ -66,7 +66,7 @@ postSchema.virtual("comments", {
     localField: "_id",
     foreignField: "postId",
     ref: "Comment",
-    justOne: true
+    // justOne: true
 });
 postSchema.pre(["find", "findOne"], function () {
     const query = this.getQuery();
@@ -81,7 +81,7 @@ postSchema.pre(["find", "findOne"], function () {
 });
 postSchema.pre(["updateOne", "findOneAndUpdate"], function () {
     const update = this.getUpdate();
-    console.log("update", update);
+    // console.log("update", update);
     if (update.deletedAt) {
         this.setUpdate({ ...update, $unset: { restoredAt: 1 } });
     }
@@ -90,7 +90,7 @@ postSchema.pre(["updateOne", "findOneAndUpdate"], function () {
         this.setQuery({ ...this.getQuery(), deletedAt: { $exists: true } });
     }
     const query = this.getQuery();
-    console.log("query", query);
+    // console.log("query", query);
     if (query.paranoid === false) {
         this.setQuery({ ...query });
     }
@@ -100,7 +100,7 @@ postSchema.pre(["updateOne", "findOneAndUpdate"], function () {
 });
 postSchema.pre(["deleteOne", "findOneAndDelete"], function () {
     const query = this.getQuery();
-    console.log("query", query);
+    // console.log("query", query);
     if (query.force === false) {
         this.setQuery({ ...query });
     }

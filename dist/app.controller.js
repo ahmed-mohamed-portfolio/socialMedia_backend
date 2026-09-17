@@ -47,9 +47,9 @@ const bootstrap = async () => {
         const { download, fileName } = req.query;
         const { path } = req.params;
         const Key = path.join('/');
-        console.log("i am here");
+        // console.log("i am here");
         const { Body, ContentType } = await s3_service_1.s3Service.getAsset({ Key });
-        console.log({ Body, ContentType });
+        // console.log({ Body, ContentType });
         res.setHeader("Content-Type", ContentType || "application/octet-stream");
         res.set("Cross-Origin-Resource-Policy", "cross-origin");
         if (download === 'true') {
