@@ -1,6 +1,6 @@
 import express from "express"
 import type { Express, Response, Request } from "express"
-import { authRouter } from "./modules"
+import { authRouter, realTimeGateway } from "./modules"
 import cors from "cors"
 import { globalErrorHandler } from "./middleware/error.middleware"
 import { PORT } from "./config/env.service"
@@ -13,6 +13,8 @@ import { pipeline } from 'node:stream'
 import { promisify } from "node:util"
 import { notificationService } from "./common/services/notification.service"
 import { postRouter } from "./modules/post"
+import { Server as HttpServerType } from 'node:http'
+
 
 
 
@@ -27,7 +29,9 @@ export const bootstrap = async (): Promise<void> => {
     app.use(cookieParser());
     app.use(cors({
         origin: [
+            "http://localhost:5500",
             "http://localhost:4200",
+            "http://127.0.0.1:5500"
         ],
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization",]
@@ -109,7 +113,12 @@ export const bootstrap = async (): Promise<void> => {
 
 
     app.use(globalErrorHandler)
-    app.listen(PORT, () => {
+    const httpServer: HttpServerType = app.listen(PORT, () => {
         console.log(`server run in port ${PORT}`)
     })
+
+
+
+    realTimeGateway.InitializeIo(httpServer)
+
 }

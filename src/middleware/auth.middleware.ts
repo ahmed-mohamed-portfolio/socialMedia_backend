@@ -29,7 +29,8 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
         throw new UnauthorizedException("un authorized")
     }
 
-    let decodedData = tokenService.decodeToken(req.cookies.accessToken) as JwtPayload
+    let decodedData = await tokenService.decodeToken(req.cookies.accessToken) as JwtPayload
+
     if (!decodedData.iat || !decodedData.id || !decodedData.jti) {
         throw new BadRequestException('bad decodedData')
     }

@@ -2,6 +2,8 @@ import { createClient, RedisClientType } from "redis"
 import { redis_uri } from "../../config"
 import { ServiceUnavailableException } from "../exceptions/application.exceptions"
 import { ObjectId } from "mongoose"
+import { Types } from "mongoose"
+
 
 export class RedisService {
     private client: RedisClientType
@@ -156,6 +158,73 @@ export class RedisService {
     async removeFCMUser(userId: ObjectId | string) {
         return await this.client.del(this.FCM_key(userId));
     }
+
+
+
+
+    //======================================
+
+
+    socketKey(userId: Types.ObjectId | string) {
+        return `user:sockets:${userId.toString()}`;
+    }
+
+
+    async addSocket(
+        userId: Types.ObjectId | string,
+        socketId: string
+    ) {
+
+
+        // console.log('this.client ', this.client);
+        // console.log('userId ', userId);
+        // console.log('socketId ', socketId);
+
+
+        return await this.client.sAdd(
+            this.socketKey(userId),
+            socketId
+        );
+    }
+
+
+    async removeSocket(
+        userId: Types.ObjectId | string,
+        socketId: string
+    ) {
+        return await this.client.sRem(
+            this.socketKey(userId),
+            socketId
+        );
+    }
+
+
+    async getSockets(
+        userId: Types.ObjectId | string
+    ) {
+        return await this.client.sMembers(
+            this.socketKey(userId)
+        );
+    }
+
+
+    async hasSockets(
+        userId: Types.ObjectId | string
+    ) {
+        return await this.client.sCard(
+            this.socketKey(userId)
+        );
+    }
+
+
+    async removeUser(
+        userId: Types.ObjectId | string
+    ) {
+        return await this.client.del(
+            this.socketKey(userId)
+        );
+    }
+
 
 
 }

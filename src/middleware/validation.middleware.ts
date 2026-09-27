@@ -106,3 +106,39 @@ console.log(user["name"])
 الاتنين هيطلعوا:
 Ahmed
 */
+
+
+
+
+
+
+export const SocketValidation = async <T>(
+    schema: ZodType<T>,
+    args: T
+) => {
+
+
+    const validationResult = schema.safeParse(args)
+
+
+    if (!validationResult.success) {
+
+
+        throw new BadRequestException(
+            "Validation error",
+            {
+                issues: validationResult.error.issues.map(issue => ({
+                    path: issue.path,
+                    message: issue.message
+                }))
+            }
+        )
+    }
+
+
+    return true
+}
+
+
+
+

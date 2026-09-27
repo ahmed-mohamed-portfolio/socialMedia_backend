@@ -65,8 +65,9 @@ export class TokenService {
         return { accessToken, refreshToken }
     }
 
-    decodeToken(token: string): string | jwt.JwtPayload {
+    async decodeToken(token: string): Promise<string | jwt.JwtPayload> {
         let decoded = jwt.decode(token) as JwtPayload
+        console.log("decoded", decoded);
 
         if (!decoded) {
             throw new BadRequestException("invalid decoded")
@@ -84,8 +85,7 @@ export class TokenService {
                 break
         }
 
-        let decodedData: string | jwt.JwtPayload = jwt.verify(token, signature)
-
+        let decodedData: string | jwt.JwtPayload = await jwt.verify(token, signature)
         return decodedData
     }
 
