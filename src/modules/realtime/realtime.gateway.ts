@@ -19,19 +19,15 @@ export class RealTimeGateway {
 
     authentication = async (socket: Socket, next: any) => {
 
-        console.log("socket.handshake", socket.handshake);
+        // console.log("socket.handshake", socket.handshake);
 
         try {
 
-
             let user = await this.tokenService.decodeToken(socket.handshake.auth.authorization) as JwtPayload
-
 
             socket.data = user
 
-
             await redisService.addSocket(user.id, socket.id)
-
 
             next()
         } catch (error) {
@@ -52,26 +48,22 @@ export class RealTimeGateway {
 
         this.io.on('connection', async (socket: Socket) => {
 
-
             let userId = socket.data.id
-
 
             chatGateway.registerEvents(socket, this.io)
 
+            let connection = await redisService.getSockets(userId)
 
-            console.log({ userId: userId, connection: await redisService.getSockets(userId) });
-
+            // console.log({ userId: userId, connection });
 
             socket.on('disconnect', async () => {
 
-
-                console.log("redisService.removeSocket", await redisService.removeSocket(userId, socket.id));
+                let removeSocket = await redisService.removeSocket(userId, socket.id)
+                // console.log("redisService.removeSocket", removeSocket);
 
 
                 let connections = await redisService.getSockets(userId) || []
-                console.log("connections from disconnect", connections.length);
-
-
+                // console.log("connections", connections, connections.length);
 
 
                 if (connections.length < 1) {

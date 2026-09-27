@@ -67,7 +67,7 @@ export class TokenService {
 
     async decodeToken(token: string): Promise<string | jwt.JwtPayload> {
         let decoded = jwt.decode(token) as JwtPayload
-        console.log("decoded", decoded);
+        // console.log("decoded", decoded);
 
         if (!decoded) {
             throw new BadRequestException("invalid decoded")
