@@ -17,6 +17,7 @@ import crypto from "node:crypto"
 import jwt from "jsonwebtoken"
 import { s3Service, S3Service } from "../../common/services/s3.service"
 import { notificationService } from '../../common/services/notification.service';
+import { populate } from 'dotenv';
 
 
 class authService {
@@ -278,7 +279,7 @@ class authService {
     }
 
     async getUserProfile(userId: string): Promise<HydratedDocument<IUser>> {
-        const userInfo: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password')
+        const userInfo: HydratedDocument<IUser> = await this.userRepository.findById(userId, '-password', { populate: [{ path: "friends" }] })
         // console.log(userInfo);
 
         if (!userInfo) {
