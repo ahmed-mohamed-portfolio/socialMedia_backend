@@ -1,5 +1,5 @@
 import { Router } from "express"
-import type { NextFunction, Request, Response } from "express"
+import type { Request, Response } from "express"
 import authService from "./auth.service"
 import { SuccessResponse } from "../../common/exceptions/success.response"
 import { changePasswordSchema, signinSchema, signupSchema, verifySchema } from "./auth.validation"
@@ -15,6 +15,10 @@ router.post("/signin", validation(signinSchema), async (req: Request, res: Respo
     let host = `${req.protocol}://${req.host}`
 
     let data = await authService.login(req.body, host)
+
+
+    // console.log("data.refreshToken", data.refreshToken);
+    // console.log("data.accessToken", data.accessToken);
 
 
     res.cookie("refreshToken", data.refreshToken, {
@@ -166,10 +170,10 @@ router.get('/generate-access-token', async (req: Request, res: Response) => {
 
 })
 
-router.get('/get-user-profile', authentication, async (req: Request, res: Response) => {
-    // console.log("req.userId", req.userId);
+router.get('/get-user-profile/:id', authentication, async (req: Request, res: Response) => {
+    console.log("req.params.id", req.params.id);
 
-    let userData = await authService.getUserProfile(req.userId)
+    let userData = await authService.getUserProfile(req.params.id as string)
 
     if (!userData) {
         throw new BadRequestException("cant get user")

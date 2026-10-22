@@ -14,6 +14,7 @@ import { promisify } from "node:util"
 import { notificationService } from "./common/services/notification.service"
 import { postRouter } from "./modules/post"
 import { Server as HttpServerType } from 'node:http'
+import { chatRouter } from "./modules/chat"
 
 
 
@@ -38,7 +39,7 @@ export const bootstrap = async (): Promise<void> => {
     }));
     app.use("/users", authRouter);
     app.use("/post", postRouter);
-
+    app.use("/chat", chatRouter)
 
 
     await redisService.connect()

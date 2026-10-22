@@ -18,6 +18,8 @@ export class ChatGateway {
 
 
         this.chatEvent.sayHi(socket)
+        this.chatEvent.sendMessage(socket, io)
+        this.chatEvent.usersInChat(socket)
     }
 
 

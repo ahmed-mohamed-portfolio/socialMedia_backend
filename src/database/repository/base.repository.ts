@@ -14,9 +14,9 @@ type Options = {
 }
 
 export class DatabaseRepository<TRawDocs> {
-    constructor(private model: Model<TRawDocs>) { }
+    constructor(protected model: Model<TRawDocs>) { }
 
-    private applyQueryOptions(query: any, select?: Select, options: Options = {}) {
+    protected applyQueryOptions(query: any, select?: Select, options: Options = {}) {
         if (select) {
             query.select(select)
         }

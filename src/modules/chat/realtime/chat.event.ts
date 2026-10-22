@@ -1,8 +1,9 @@
-
-import { Socket } from "socket.io";
+import { redisService } from './../../../common/services/redis.service';
+import { Server, Socket } from "socket.io";
 import { ChatService } from "../chat.services";
 import { SocketValidation } from "../../../middleware/validation.middleware";
 import * as validators from '../chat.validation'
+import authService from "./../../auth/auth.service"
 
 
 
@@ -11,7 +12,6 @@ export class ChatEvent {
 
 
     private chatService: ChatService
-
 
     constructor() {
         this.chatService = new ChatService();
@@ -100,6 +100,49 @@ export class ChatEvent {
 
 
 
+    }
+
+    sendMessage = (socket: Socket, io: Server) => {
+        return socket.on("sendMessage", async ({ content, sendTo }) => {
+            try {
+                // console.log("socket.data", socket.data);
+                console.log("{ content, sendTo }", { content, sendTo });
+
+                let userId = socket.data.id
+                let message = await this.chatService.sendMessage({ content, sendTo }, userId)    //save to database
+                console.log("message", message);
+
+                io.to(await redisService.getSockets(userId)).emit("successMessage", message) // user A   successMessage
+
+                let receverSocketIds = await redisService.getSockets(sendTo)
+                if (receverSocketIds.length) {
+                    let userData = await authService.getUserProfile(userId) // this is not good code user info must come from decoded token
+
+                    socket.to(receverSocketIds).emit("newMessage", { message, from: userData })   //user B   newMessage
+                }
+                // console.log({ content, sendTo });
+            } catch (error) {
+                socket.emit("custom_error", error)
+            }
+
+        })
+    }
+
+    usersInChat = async (socket: Socket) => {
+        socket.on("getUsersInChat", async () => {
+            try {
+                let userId = socket.data.id
+
+                const usersInChat = await this.chatService.getUsersInChat(userId);
+
+                socket.emit('usersInChat', usersInChat);
+
+
+            } catch (error) {
+                socket.emit("custom_error", error)
+            }
+
+        })
     }
 
 
