@@ -7,6 +7,7 @@ import { DatabaseRepository } from "../database/repository/base.repository"
 import userModel from "../database/model/user.model"
 import { JwtPayload } from "jsonwebtoken"
 import { HydratedDocument } from 'mongoose';
+import { RoleEnum } from '../common/enums';
 
 declare global {
     namespace Express {
@@ -60,11 +61,41 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
 
 
 
-//!!! i need to complete it
-export const authorization = (req: Request, res: Response, next: NextFunction) => {
 
+export const authorization = (accessRoles: RoleEnum[] = []) => {
 
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        if (!accessRoles.includes(req.user.role as any)) {
+            throw new BadRequestException("not authorized account")
+        }
+        next()
+    }
 
-    next()
 
 }
+
+
+
+/*
+
+export const authorization = (accessRoles: RoleEnum[] = []) => {
+    return async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        if (!req.user) {
+            throw new UnauthorizedException("Authentication required");
+        }
+
+        const { role } = req.user;
+
+        if (role === undefined || !accessRoles.includes(role)) {
+            throw new ForbiddenException("Not authorized account");
+        }
+
+        next();
+    };
+};
+
+*/

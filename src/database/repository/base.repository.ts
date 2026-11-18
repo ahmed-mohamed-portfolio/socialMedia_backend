@@ -14,6 +14,7 @@ type Options = {
 }
 
 export class DatabaseRepository<TRawDocs> {
+
     constructor(protected model: Model<TRawDocs>) { }
 
     protected applyQueryOptions(query: any, select?: Select, options: Options = {}) {
@@ -202,4 +203,6 @@ export class DatabaseRepository<TRawDocs> {
     exists(filter: QueryFilter<TRawDocs> = {}) {
         return this.model.exists(filter)
     }
+
+
 }

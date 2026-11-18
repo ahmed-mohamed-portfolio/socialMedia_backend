@@ -29,7 +29,20 @@ export class ChatRepository extends DatabaseRepository<IChat> {
         page = parseInt(page as string)
         size = parseInt(size as string)
 
-        const query = this.model.findOne(filter, { messages: { $slice: [-(page * size), size] } }, options)
+        const query = this.model.findOne(filter, {
+            messages: { $slice: [-(page * size), size] },
+            totalMessages: {
+                $size: '$messages'
+            },
+            pages: {
+                $ceil: {
+                    $divide: [
+                        { $size: '$messages' },
+                        size
+                    ]
+                }
+            }
+        }, options)
 
         return this.applyQueryOptions(query, select, options)
     }

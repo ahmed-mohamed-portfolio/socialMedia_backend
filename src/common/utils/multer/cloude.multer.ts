@@ -21,5 +21,6 @@ export const cloudeFileUpload = (
     })
 
     return multer({ fileFilter: fileFilter(validation), storage, limits: { fileSize: maxSize * 1024 * 1024 } })
+
 }
 

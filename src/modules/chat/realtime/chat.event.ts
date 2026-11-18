@@ -1,4 +1,4 @@
-import { redisService } from './../../../common/services/redis.service';
+import { RedisService, redisService } from './../../../common/services/redis.service';
 import { Server, Socket } from "socket.io";
 import { ChatService } from "../chat.services";
 import { SocketValidation } from "../../../middleware/validation.middleware";
@@ -12,9 +12,10 @@ export class ChatEvent {
 
 
     private chatService: ChatService
-
+    private redisService: RedisService
     constructor() {
         this.chatService = new ChatService();
+        this.redisService = new RedisService()
     }
 
 
@@ -129,8 +130,11 @@ export class ChatEvent {
     }
 
     usersInChat = async (socket: Socket) => {
+
         socket.on("getUsersInChat", async () => {
+
             try {
+
                 let userId = socket.data.id
 
                 const usersInChat = await this.chatService.getUsersInChat(userId);
@@ -145,7 +149,66 @@ export class ChatEvent {
         })
     }
 
+    checkStatus = (socket: Socket) => {
 
+        return socket.on("checkStatus", async (userId: string) => {
+            try {
+
+                const userSockets = await redisService.getSockets(userId);
+
+                socket.emit("onlineOrOffline", {
+                    userId,
+                    isOnline: userSockets.length > 0
+                });
+
+            } catch (error) {
+                socket.emit("custom_error", error);
+            }
+        });
+    }
+
+
+    //not test in front yet
+    sendGroupMessage = (socket: Socket, io: Server) => {
+
+        return socket.on("sendGroupMessage", async ({ content, groupId }: { groupId: string, content: string }) => {
+            try {
+                console.log({ content, groupId });
+
+                const roomId = await this.chatService.sendGroupMessage({ content, groupId }, socket.data.user);
+
+                io.to(await this.redisService.getSockets(socket.data.user._id)).emit("successMessage", {
+                    content,
+                    sendTo: groupId
+                });
+
+                socket.to(roomId).emit("newMessage", { content, groupId })
+            } catch (error) {
+                console.log({ error });
+
+                socket.emit("custom_error", error);
+            }
+        }
+        );
+    }
+
+
+
+    //not test in front yet
+    join_room = (socket: Socket, io: Server) => {
+
+        return socket.on("join_room", async ({ roomId }: { roomId: string }) => {
+            try {
+                socket.join(roomId);
+
+            } catch (error) {
+                console.log({ error });
+
+                socket.emit("custom_error", error);
+            }
+        }
+        );
+    }
 }
 
 

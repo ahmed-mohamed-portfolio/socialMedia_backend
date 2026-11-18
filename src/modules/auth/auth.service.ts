@@ -7,7 +7,7 @@ import { changePasswordDto, loginDto, signupDto, verifyEmailDto } from "./auth.d
 import { BadRequestException } from "../../common/exceptions/application.exceptions"
 import { verifyEmailEvent } from "../../common/utils/email/email.events"
 import { redisService } from "../../common/services/redis.service"
-import { IUser } from "../../common/interfaces"
+import { IChat, IUser } from "../../common/interfaces"
 import userModel from "../../database/model/user.model"
 import { ProviderEnum, RoleEnum } from "./../../common/enums/index"
 import { TokenService } from "../../common/services/token.service"
@@ -18,6 +18,7 @@ import jwt from "jsonwebtoken"
 import { s3Service, S3Service } from "../../common/services/s3.service"
 import { notificationService } from '../../common/services/notification.service';
 import { populate } from 'dotenv';
+import { ChatRepository } from '../../database/repository';
 
 
 class authService {
@@ -27,12 +28,14 @@ class authService {
     private securityService: SecurityService
     private tokenService: TokenService
     private s3: S3Service
+    private chatRepository: ChatRepository
     constructor() {
         this.userModel = userModel
         this.userRepository = new DatabaseRepository(this.userModel)
         this.securityService = new SecurityService()
         this.tokenService = new TokenService()
         this.s3 = s3Service
+        this.chatRepository = new ChatRepository()
     }
 
     async login(data: loginDto, issuer: string) {
@@ -427,6 +430,31 @@ class authService {
 
 
     }
+
+
+    //not test in front yet
+    async profile(user: HydratedDocument<IUser>): Promise<{
+        user: IUser,
+        groups: HydratedDocument<IChat>[]
+    }> {
+
+        await user.populate([{ path: "friends" }]);
+
+        const groups = await this.chatRepository.find({
+            filter: {
+                participants: { $in: [user._id] }
+            }
+        });
+
+        return {
+            user: user.toJSON(),
+            groups
+        };
+    }
+
 }
+
+
+
 
 export default new authService()
